@@ -18,6 +18,7 @@ Connect to the official web page to get the latest news
 + [Bhushan R. Gopaluni](http://www.chbe.ubc.ca/profile/bhushan-gopaluni/)
 + [Richard D.Braatz](http://web.mit.edu/cheme/people/profile.html?id=48)
 + [Davide M. Raimondo](http://sisdin.unipv.it/labsisdin/raimondo/raimondo.php)
+
 -----------------------------------------------------------------
 ## Citations
 
