@@ -7,4 +7,14 @@ Consumer electronics, wearable and personal health devices, power networks, micr
  
  Please download the main zip file and the user manual from the files link
  
+## Changelog
+
+### Last Update 08/27/2016
+
++ Fixed bug in multicell simulation (Thanks to Chintan Pathak for pointing out the bug)
+
+### V 1.021b
++ Fixed SOC calculation bug for Fick's diffusion
++ Minor fixes
+ 
  
