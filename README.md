@@ -5,7 +5,11 @@ Consumer electronics, wearable and personal health devices, power networks, micr
  
 ## Usage
  
- Please download the main zip file and the user manual from the files link
+ Download the whole package of [LIONSIMBA](https://github.com/lionsimbatoolbox/LIONSIMBA/archive/master.zip) or clone the Git Repository using the following command
+ 
+ ```sh
+$ git clone https://github.com/lionsimbatoolbox/LIONSIMBA.git
+```
  
 ## Changelog
 
