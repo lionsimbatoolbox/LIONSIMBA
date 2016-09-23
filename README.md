@@ -56,7 +56,12 @@ marcello (**dot**) torchio01 (**at**) ateneopv (**dot**) it
 
 ## Changelog
 
-### Last Update 08/27/2016
+### Last Update 09/23/2016 - V 1.022 Released
+
++ Added support for analytical Jacobian. LIONSIMBA is now able to deriva automatically the analytical form of the Jacobian describing the P2D dynamics. This knowledge is the exploited from the integration process to speed up the resolution of the DAEs.
++ Minor fixes in the examples.
+
+### 08/27/2016
 
 + Fixed bug in multicell simulation (Thanks to Chintan Pathak for pointing out the bug)
 

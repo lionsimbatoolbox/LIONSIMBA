@@ -229,13 +229,13 @@ param.CutoverSOC = 90;
 param.Nal   = 10;
 
 % Number of volumes in the positive electrode
-param.Np    = 20;%21
+param.Np    = 10;%21
 
 % Number of volumes in the separator
 param.Ns    = 10;
 
 % Number of volumes in the negative electrode
-param.Nn    = 20;
+param.Nn    = 10;
 
 % Number of volumes in the carbon current collector
 param.Nco   = 10;
@@ -317,8 +317,8 @@ param.V_reference = 4;
 %% Tolerances
 
 % Integrator tolerances
-param.AbsTol = 1e-7;
-param.RelTol = 1e-7;
+param.AbsTol = 1e-6;
+param.RelTol = 1e-6;
 
 %% Ageing parameters (TESTING PURPOSES, BETA VERSION)
 
@@ -342,5 +342,17 @@ param.Uref_s            = 0.4;
 param.I1C 				= 29.5;
 % Weigth used in the aging dynamics
 param.w 				= 2;
+
+
+% Set to 1 if the user wants to use tha Jacobian matrix during
+% calculations.
+param.UseJacobian       = 1;
+
+% This value, if set, represents the Jacobian function used from the
+% integrator. It has to be a class 'Function' of the CasADi package. If
+% provided, with UseJacobian=1, it will be used for speed up the
+% integration process. If not provided, with UseJacobian=1, the code will
+% compute the Jacobian on its own.
+param.JacobianFunction = [];
 
 end

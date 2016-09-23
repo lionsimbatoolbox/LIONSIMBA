@@ -185,10 +185,14 @@ first_co    = Lambda_n_co/den_n_co;
 
 A_tot(param.Nal+param.Np+param.Ns+param.Nn+1,param.Nal+param.Np+param.Ns+param.Nn:param.Nal+param.Np+param.Ns+param.Nn+2) = [-first_co (second_co+first_co) -second_co]/(param.deltax_co*param.len_co);
 
-A_tot = sparse(A_tot);
-
-Qrev_tot = (sparse([zeros(param.Nal,1);Qrev_p;zeros(param.Ns,1);Qrev_n;zeros(param.Nco,1)]));
-Qrxn_tot = (sparse([zeros(param.Nal,1);Qrxn_p;zeros(param.Ns,1);Qrxn_n;zeros(param.Nco,1)]));
+if(~isa(T,'casadi.SX'))
+    A_tot = sparse(A_tot);
+    Qrev_tot = (sparse([zeros(param.Nal,1);Qrev_p;zeros(param.Ns,1);Qrev_n;zeros(param.Nco,1)]));
+    Qrxn_tot = (sparse([zeros(param.Nal,1);Qrxn_p;zeros(param.Ns,1);Qrxn_n;zeros(param.Nco,1)]));
+else
+    Qrev_tot = (([zeros(param.Nal,1);Qrev_p;zeros(param.Ns,1);Qrev_n;zeros(param.Nco,1)]));
+    Qrxn_tot = (([zeros(param.Nal,1);Qrxn_p;zeros(param.Ns,1);Qrxn_n;zeros(param.Nco,1)]));
+end
 
 Qohm_tot = [param.I^2/param.sig_al*ones(param.Nal,1);Qohm_p;Qohm_s;Qohm_n;param.I^2/param.sig_co*ones(param.Nco,1)];
 

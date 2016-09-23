@@ -8,8 +8,8 @@
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LIONSAMBA example script
-% CC_CV_charge scenario: this script provides an example to runa a
-% constant current-constant voltage charge of the cell.
+% Custom current profile: this script shows how to run a custom current
+% profile charge/discharge
 
 % Clear the workspace
 clear all
@@ -55,6 +55,10 @@ C_rate = 1.5;
 % Discharge the battery to the 20% of SOC
 out = startSimulation(t0,tf,initialState,-25,param);
 
+% Store the Jacobian matrix
+param{1}.JacobianFunction = out.JacobianFun;
+
+% Update the initial states
 initialState = out.initialState;
 
 % Redefine the cutoff SOC in order to avoid simulation interruptions
@@ -63,16 +67,22 @@ param{1}.CutoffSOC     = 2;
 % Rest the battery with no current applied
 out2 = startSimulation(0,5000,initialState,0,param);
 
+% Update the initial states
 initialState = out2.initialState;
 
+% Apply a custom current profile
 param{1}.AppliedCurrent = 2;
 
+% Run the simulation
 out3 = startSimulation(0,5000,initialState,0,param);
 
+% Update the initial states
 initialState = out3.initialState;
 
+% Go back to galvanostatic operating conditions
 param{1}.AppliedCurrent = 1;
 
+% Run the simulation
 out4 = startSimulation(0,5000,initialState,0,param);
 %% Plot the results
 

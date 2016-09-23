@@ -55,7 +55,8 @@
 %     results.etap{i}:                      Cathode overpotential
 %     results.etan{i}:                      Anode overpotential
 %     results.parameters{i}:                Parameters used for the simulation
-%
+%     results.JacobianFun:                  If evaluated, contains the
+%                                           Jacobian matrix
 
 function results = startSimulation(t0,tf,initialState,I,startParameters)
 
@@ -66,7 +67,7 @@ catch
 end
 
 % Version of LIONSIMBA
-version       = '1.021b';
+version       = '1.022';
 
 if(isempty(startParameters))
     % Load battery's parameters if not provided by the user
@@ -106,7 +107,7 @@ if(param{1}.PrintHeaderInfo==1)
     fprintf('|                                    |\n')
     fprintf('|            LIONSIMBA               |\n')
     fprintf('|            Tooblbox                |\n')
-    fprintf('|            version %s          |\n',version)
+    fprintf('|            version %s           |\n',version)
     fprintf('|                                    |\n')
     fprintf('\\------------------------------------/\n')
     fprintf('Copyright (C) 2015-%d by M.Torchio, L.Magni, B.Gopaluni, R.D.Braatz and D.M.Raimondo\n\n',str2double(datestr(now,'yyyy'))+1)
@@ -330,8 +331,6 @@ else
     nc = ' cells';
 end
 
-disp(['Finding a set of consistent ICs for ',num2str(n_cells),nc,' battery pack. Please wait..'])
-
 % Empty the used arrays
 ce_t            = cell(n_cells,1);
 cs_bar_t        = cell(n_cells,1);
@@ -375,15 +374,68 @@ for i=1:n_cells
     id = [id;ones(n_diff(i),1);zeros(n_alg(i),1)];
 end
 
-% Define the options for Sundials
-options = IDASetOptions('RelTol',opt.RelTol,...
-    'AbsTol',opt.AbsTol,...
-    'MaxNumSteps',1500,...
-    'VariableTypes',id,...
-    'UserData',dati);
+JacFun = [];
+if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
+    disp('Evaluating the analytical form of the Jacobian matrix. Please wait...')
+    % Import casadi framework
+    import casadi.*
+    % Define the symbolic variables.
+    xsym    = SX.sym('x',[sum(n_diff)+sum(n_alg),1]);
+    xpsym   = SX.sym('xp',[sum(n_diff)+sum(n_alg),1]);
+    cj      = SX.sym('cj',1);
+%     keyboard
+    % Get the model equations in a symbolic way
+    [dx_tot, ~, ~] = batteryModel(0,xsym,xpsym,dati);
+    
+    % Evaluate the Jacobian matrix
+    J = jacobian(dx_tot,xsym) + cj*jacobian(dx_tot,xpsym);
+    
+    %Define a function for the Jacobian evaluation
+    JacFun = Function('fJ',{xsym,cj},{J});
+    
+    % Pass this function pointer to the routine that IDA will call for the
+    % evaluation of the Jacobian values.
+    dati.fJ = JacFun;
+    
+    % Define the options for Sundials
+    options = IDASetOptions('RelTol',opt.RelTol,...
+        'AbsTol',opt.AbsTol,...
+        'MaxNumSteps',1500,...
+        'VariableTypes',id,...
+        'UserData',dati,...
+        'JacobianFn',@djacfn);
+    
+elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
+    disp('Analytical function of the Jacobian matrix provided by the user.')
+    % If the Jacobian has been provided from the user, use it.
+    JacFun = param{1}.JacobianFunction;
+    
+    % Pass this function pointer to the routine that IDA will call for the
+    % evaluation of the Jacobian values.
+    dati.fJ = JacFun;
+    
+    % Define the options for Sundials
+    options = IDASetOptions('RelTol',opt.RelTol,...
+        'AbsTol',opt.AbsTol,...
+        'MaxNumSteps',1500,...
+        'VariableTypes',id,...
+        'UserData',dati,...
+        'JacobianFn',@djacfn);
+else
+    % Define the options for Sundials
+    options = IDASetOptions('RelTol',opt.RelTol,...
+        'AbsTol',opt.AbsTol,...
+        'MaxNumSteps',1500,...
+        'VariableTypes',id,...
+        'UserData',dati);
+end
+
+
 
 % Init the solver
 IDAInit(@batteryModel,t0,Y0,YP0,options);
+
+disp(['Finding a set of consistent ICs for ',num2str(n_cells),nc,' battery pack. Please wait..'])
 % Find consistent initial conditions
 [~, yy, ~] = IDACalcIC(t0+10,'FindAlgebraic');
 
@@ -650,6 +702,7 @@ for i=1:n_cells
     results.dudtn{i}                       = dudtn_t{i};
     results.Q{i}                           = Q_t{i};
     results.parameters{i}                  = param{i};
+    results.JacobianFun                    = JacFun;
     
     % Store original data.
     results.original.Phis{i}               = Phis_t_o{i};
@@ -748,4 +801,20 @@ else
 end
 Csout  = sum(cs_average);
 Sout   = 100*(1/param{i}.len_n*(param{i}.len_n/(param{i}.Nn))*Csout/param{i}.cs_max(3));
+end
+
+
+% This function is used to evaluate the Jacobian Matrix of the P2D model.
+function [J, flag, new_data] = djacfn(t, y, yp, rr, cj, data)
+
+% Extract the function object
+fJ          = data.fJ;
+
+% Evaluate the Jacobian with respect to the current values of the states
+% and their time derivatives.
+J           = full(fJ(y,cj));
+
+% Return the values
+flag        = 0;
+new_data    = [];
 end

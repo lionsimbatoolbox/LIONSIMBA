@@ -30,6 +30,9 @@ param{1}.hcell = 0.01;
 
 out1 = startSimulation(t0,tf,[],-30,param);
 
+% Store the Jacobian matrix
+param{1}.JacobianFunction = out1.JacobianFun;
+
 % Change the hcell parameter and set it to 1 [W / (m^2 K)]
 param{1}.hcell = 1;
 

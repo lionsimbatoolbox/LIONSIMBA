@@ -14,7 +14,7 @@ function [res_Phie,Keff] = electrolytePotential(jflux,ce,T,param,Phie)
 
 %% Effective electrolyte conductivity
 % Keff = param.ElectrolyteConductivityFunction(ce,T,param);
-
+% keyboard
 % Comment this for benchmark purposes
 Keff_p = param.ElectrolyteConductivityFunction(ce(1:param.Np),T(param.Nal+1:param.Nal+param.Np),param,'p');
 Keff_s = param.ElectrolyteConductivityFunction(ce(param.Np+1:param.Np+param.Ns),T(param.Nal+param.Np+1:param.Nal+param.Np+param.Ns),param,'s');
@@ -115,9 +115,13 @@ prod_s = (Keff_s_medio.*[T_mean_s;T_mean_sn].*[ce_flux_s;ce_flux_sn].*[1./ce_mea
 % The last element of Keff_n_medio is not needed
 prod_n = (Keff_n_medio(1:end-1).*T_mean_n.*ce_flux_n.*1./ce_mean_n);
 
-prod_tot = diff([prod_p;prod_s;prod_n]);
+if(isa(prod_p,'casadi.SX'))
+    prod_tot = [prod_p;prod_s;prod_n];
+    prod_tot = prod_tot(2:end)-prod_tot(1:end-1);
+else
+    prod_tot = diff([prod_p;prod_s;prod_n]);
+end
 prod_tot = [prod_p(1);prod_tot];
-
 flux_p = param.deltax_p*param.len_p*param.F*param.a_i(1)*jflux(1:param.Np);
 
 flux_s = param.deltax_s*param.len_s*param.F*param.a_i(2);
@@ -128,9 +132,12 @@ flux_tot = [flux_p;flux_s*ones(param.Ns,1);flux_n];
 
 f = flux_tot-K*prod_tot;
 % Set the last element of Phie to 0
-f(end+1) = 0;
+% f(end+1) = 0;
+f=[f;0];
 
-A_tot = sparse(A_tot);
+if(~isa(prod_p,'casadi.SX'))
+    A_tot = sparse(A_tot);
+end
 
 res_Phie = A_tot*Phie-f;
 end

@@ -8,11 +8,11 @@
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LIONSAMBA example script
-% CC_CV_charge scenario: this script provides an example to runa a
+% CC_CV_charge scenario: this script provides an example to run a
 % constant current-constant voltage charge of the cell.
 
 % Clear the workspace
-clear all
+clear
 close all
 
 %% Parameters
@@ -27,12 +27,12 @@ initialState.YP = [];
 % Define the parameters structure.
 param{1}               = Parameters_init;
 
-param{1}.Np            = 10;
-param{1}.Ns            = 10;
-param{1}.Nn            = 10;
+param{1}.Np            = 30;
+param{1}.Ns            = 30;
+param{1}.Nn            = 30;
 
-param{1}.hcell = 1;
-param{1}.Tref = 298.15;
+param{1}.hcell         = 1;
+param{1}.Tref          = 298.15;
 
 param{1}.AbsTol        = 1e-6;
 param{1}.RelTol        = 1e-6;
@@ -48,12 +48,18 @@ else
     multp = 1;
     multn = 1;
 end
+
+% Define 1C rate of current
 I1C = 29.5;
 
+% Allow up to 2C rate in the CC stage
 C_rate = 1.5;
 %% Discharge section
 % Discharge the battery to the 20% of SOC
 out = startSimulation(t0,tf,initialState,-25,param);
+
+% Store the Jacobian Matrix
+param{1}.JacobianFunction = out.JacobianFun;
 
 initialState = out.initialState;
 
@@ -77,6 +83,10 @@ initialState = out3.initialState;
 %% Constant Voltage
 % Define a new parameter strutcutre for CV cycling
 param2 = param;
+
+% Empty the Jacobian matrix!! During the CV stage, the set of equations
+% changes
+param2{1}.JacobianFunction = [];
 
 % Potentiostatic operations
 param2{1}.AppliedCurrent = 3;

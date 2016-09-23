@@ -102,6 +102,8 @@ parameters_list {end+1} = 'i_0_jside';
 parameters_list {end+1} = 'Uref_s';
 parameters_list {end+1} = 'I1C';
 parameters_list {end+1} = 'w';
+parameters_list {end+1} = 'UseJacobian';
+parameters_list {end+1} = 'JacobianFunction';
 
 
 k = 1;

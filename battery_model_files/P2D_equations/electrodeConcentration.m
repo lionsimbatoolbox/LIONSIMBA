@@ -23,8 +23,10 @@ else
     % First, retreive the diffusion coefficients
     [Dps_eff, Dns_eff] = param.SolidDiffusionCoefficientsFunction(T,param);
     % Initialize the variables
-    ddCs_p = zeros(param.Np*param.Nr_p,1);
-    ddCs_n = zeros(param.Nn*param.Nr_n,1);
+%     ddCs_p = zeros(param.Np*param.Nr_p,1);
+%     ddCs_n = zeros(param.Nn*param.Nr_n,1);
+    ddCs_p = [];
+    ddCs_n = [];
     start_cs = 1;
     % For every single CV in the cathode, let assume the presence of a
     % solid particle
@@ -45,8 +47,10 @@ else
 		% Neumann BC should be imposed at cs_barratoxx_p but given that at that point the derivative is zero, its contribution here
 		% is neglected.
         cs_barratoxx_p(end)             = cs_barratoxx_p(end) + 50*param.SO_D_dx_p*cs_barratox_p(param.Nr_p)*param.SO_D_c_p;
-        ddCs_p((i-1)*param.Nr_p+start_cs)       = cst_solid(1)-(Dps_eff(i)*(3*cs_barratoxx_p(1)));
-        ddCs_p((i-1)*param.Nr_p+start_cs+1:i*param.Nr_p)   = cst_solid(2:end)-(Dps_eff(i)*((cs_barratoxx_p(2:end)+2./(param.Rad_position_p(2:end)).*cs_barratox_p(2:end))));
+%         ddCs_p((i-1)*param.Nr_p+start_cs)       = cst_solid(1)-(Dps_eff(i)*(3*cs_barratoxx_p(1)));
+%         ddCs_p((i-1)*param.Nr_p+start_cs+1:i*param.Nr_p)   = cst_solid(2:end)-(Dps_eff(i)*((cs_barratoxx_p(2:end)+2./(param.Rad_position_p(2:end)).*cs_barratox_p(2:end))));
+        ddCs_p = [ddCs_p;cst_solid(1)-(Dps_eff(i)*(3*cs_barratoxx_p(1)))];
+        ddCs_p = [ddCs_p;cst_solid(2:end)-(Dps_eff(i)*((cs_barratoxx_p(2:end)+2./(param.Rad_position_p(2:end)).*cs_barratox_p(2:end))))];
     end
     
     start_cs = param.Np*param.Nr_p+1;
@@ -67,8 +71,10 @@ else
 		% is neglected.
         cs_barratoxx_n                  = param.SO_D_n*cs_solid*param.SO_D_c_n;
         cs_barratoxx_n(end)             = cs_barratoxx_n(end) + 50*param.SO_D_dx_n*cs_barratox_n(param.Nr_n)*param.SO_D_c_n;
-        ddCs_n((i-1)*param.Nr_n+1) = cst_solid(1)-(Dns_eff(i)*(3*cs_barratoxx_n(1)));
-        ddCs_n((i-1)*param.Nr_n+1+1:i*param.Nr_n) = cst_solid(2:end)-(Dns_eff(i)*((cs_barratoxx_n(2:end)+2./(param.Rad_position_n(2:end)).*cs_barratox_n(2:end))));
+%         ddCs_n((i-1)*param.Nr_n+1) = cst_solid(1)-(Dns_eff(i)*(3*cs_barratoxx_n(1)));
+%         ddCs_n((i-1)*param.Nr_n+1+1:i*param.Nr_n) = cst_solid(2:end)-(Dns_eff(i)*((cs_barratoxx_n(2:end)+2./(param.Rad_position_n(2:end)).*cs_barratox_n(2:end))));
+        ddCs_n =[ddCs_n;cst_solid(1)-(Dns_eff(i)*(3*cs_barratoxx_n(1)))];
+        ddCs_n =[ddCs_n;cst_solid(2:end)-(Dns_eff(i)*((cs_barratoxx_n(2:end)+2./(param.Rad_position_n(2:end)).*cs_barratox_n(2:end))))];
     end
 end
 ddCs = [ddCs_p;ddCs_n];

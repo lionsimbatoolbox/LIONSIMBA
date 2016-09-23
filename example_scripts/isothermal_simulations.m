@@ -29,6 +29,9 @@ param{1}.TemperatureEnabled = 0;
 
 out1 = startSimulation(t0,tf,[],-15,param);
 
+% Store the Jacobian matrix
+param{1}.JacobianFunction = out1.JacobianFun;
+
 % Run the simulation
 out2 = startSimulation(t0,tf,[],-30,param);
 

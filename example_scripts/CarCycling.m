@@ -57,11 +57,12 @@ for i=1:length(timings)
     results 	= startSimulation(t0,tf,initialState,input_currents(i),param);
     % Concatenate the results
     if(run_n==1)
-        ce_tot 			= [ce_tot;results.ce{1}];
-        SOC_tot         = [SOC_tot;results.SOC{1}];
-        Phis_tot 		= [Phis_tot;results.Phis{1}];
-        Temperature_tot = [Temperature_tot;results.Temperature{1}];
-        t_tot           = [t_tot;results.time{1}];
+        ce_tot 						= [ce_tot;results.ce{1}];
+        SOC_tot         			= [SOC_tot;results.SOC{1}];
+        Phis_tot 					= [Phis_tot;results.Phis{1}];
+        Temperature_tot 			= [Temperature_tot;results.Temperature{1}];
+        t_tot           			= [t_tot;results.time{1}];
+		param{1}.JacobianFunction 	= results.JacobianFun;
         run_n = 2;
     else
         ce_tot 			= [ce_tot;results.ce{1}(2:end,:)];

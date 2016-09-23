@@ -30,4 +30,15 @@ else
     disp('SUNDIALS Package FOUND!');
 end
 
+%Check for CasADi
+disp('Checking for CasADi availability...');
+
+try
+    import casadi.*
+catch e
+    error('The SUNDIALS software does not seem to be present in the search path or installed on your system.\nPlease go to:\nhttps://github.com/casadi/casadi/wiki/InstallationInstructions\nand follow the instruction for installing CasADi in MATLAB.');
+end
+
+disp('CasADi Package FOUND!');
+
 end

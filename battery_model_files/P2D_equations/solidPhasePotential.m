@@ -16,7 +16,7 @@ function [res_Phis] = solidPhasePotential(jflux,param,Phis)
 
 % RHS for the solid potential in the positive electrode. The BC on the left
 % is enforced
-f_p(1,1) = ((param.len_p*param.deltax_p*param.a_i(1)*param.F*jflux(1))-param.I)*param.deltax_p*param.len_p/param.sig_eff(1);
+f_p = ((param.len_p*param.deltax_p*param.a_i(1)*param.F*jflux(1))-param.I)*param.deltax_p*param.len_p/param.sig_eff(1);
 % RHS for the solid potential in the positive electrode.
 f_p = [f_p;(param.len_p^2*param.deltax_p^2*param.a_i(1)*param.F*jflux(2:param.Np))/param.sig_eff(1)];
 
