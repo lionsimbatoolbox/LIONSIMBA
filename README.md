@@ -1,10 +1,18 @@
-# LIONSIMBA - Lithium-ION SIMulation BAttery Toolbox
+
+# LIONSIMBA - Lithium-ION SIMulation BAttery Toolbox 
+
+<img style="float:right" height="330px" src="http://i68.tinypic.com/2nuhq9h.jpg" alt="Sublime's custom image"/>
+
  A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
 
 Consumer electronics, wearable and personal health devices, power networks, microgrids, and hybrid electric vehicles (HEVs) are some of the many applications of lithium-ion batteries. Their optimal design and management are important for safe and profitable operations. The use of accurate mathematical models can help in achieving the best performance. This page provides a parametrizable Matlab framework for battery design, simulation, and control of Li-ion cells or battery packs. Based on the well known, theory-based pseudo-two-dimensional (P2D) model, the framework has been coded by reformulating the set of PDEs describing the cell behavior into a set of DAEs. The time domain is left continuous, while the spatial domain is discretized according to the Finite Volume Method (FVM). The time-adaptive DAE solver IDA is used to solve the resulting set of DAEs.
 
-##### **Read the Journal paper** [here](http://jes.ecsdl.org/content/163/7/A1192.abstract)
------------------------------------------------------------------
+
+
+
+<br>
+<br>
+<br>
 ## Official Web Page
 
 Connect to the official web page to get the latest news
@@ -37,7 +45,7 @@ If LIONSIMBA Toolbox is used for research purposes, the authors would like to ha
 
 ##### **Download here the [BibTeX](http://sisdin.unipv.it/labsisdin/mtorchio/lionsimba.bib) file**
 
-
+##### **Read the Journal paper** [here](http://jes.ecsdl.org/content/163/7/A1192.abstract)
 
 -----------------------------------------------------------------
 
@@ -58,7 +66,7 @@ marcello (**dot**) torchio01 (**at**) ateneopv (**dot**) it
 
 ### Last Update 09/23/2016 - V 1.022 Released
 
-+ Added support for analytical Jacobian. LIONSIMBA is now able to derive automatically the analytical form of the Jacobian describing the P2D dynamics. This knowledge is the exploited from the integration process to speed up the resolution of the DAEs. (Thanks to Dr. Sergio Lucia and Prof. Rolf Findeisen for pointing us out the automatic differentiation provided by CasADi toolbox)
++ Added support for analytical Jacobian. LIONSIMBA is now able to derive automatically the analytical form of the Jacobian describing the P2D dynamics. This knowledge is the exploited from the integration process to speed up the resolution of the DAEs. (Thanks to Dr. Sergio Lucia and Prof. Rolf Findeisen for pointing us out the automatic differentiation provided by [CasADi](https://github.com/casadi/casadi/wiki) toolbox)
 + Minor fixes in the examples.
 
 ### 08/27/2016
