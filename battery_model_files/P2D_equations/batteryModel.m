@@ -31,7 +31,7 @@ for i=1:n_cells
     % From the overall number of variables, extract those related to the
     % current cell.
     x       = x_tot(param.x_index);
-    xp      = xp_tot(param.x_index);
+    xp      = xp_tot(param.xp_index);
     
     % Due to the presence of series-connected cells, theoretically they are
     % all crossed by the same current. Novertheless, each cell can be
@@ -60,6 +60,10 @@ for i=1:n_cells
     js          = x(param.js_indices);
     % App current
     I_app       = x(param.Iapp_indices);
+    
+    if(param.useSymbolic)
+        symParams = x(param.params_indices);
+    end
     
     % Electrolyte concentration derivative
     dCe         = xp(param.ce_indices,1);

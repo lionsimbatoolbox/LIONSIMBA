@@ -115,7 +115,7 @@ prod_s = (Keff_s_medio.*[T_mean_s;T_mean_sn].*[ce_flux_s;ce_flux_sn].*[1./ce_mea
 % The last element of Keff_n_medio is not needed
 prod_n = (Keff_n_medio(1:end-1).*T_mean_n.*ce_flux_n.*1./ce_mean_n);
 
-if(isa(prod_p,'casadi.SX'))
+if(isa(prod_p,'casadi.SX') || isa(prod_p,'casadi.MX'))
     prod_tot = [prod_p;prod_s;prod_n];
     prod_tot = prod_tot(2:end)-prod_tot(1:end-1);
 else
@@ -135,7 +135,7 @@ f = flux_tot-K*prod_tot;
 % f(end+1) = 0;
 f=[f;0];
 
-if(~isa(prod_p,'casadi.SX'))
+if(~isa(prod_p,'casadi.SX') && ~isa(prod_p,'casadi.MX'))
     A_tot = sparse(A_tot);
 end
 

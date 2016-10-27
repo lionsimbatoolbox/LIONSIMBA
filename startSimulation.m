@@ -85,34 +85,11 @@ if(param{1}.AppliedCurrent==1)
 end
 
 % Check for environmental tool availability
-checkEnvironment(param{1},nargin);
+checkEnvironment(param,nargin);
 
-% For each parameter structure, check if all the fields are set.
-for i=1:length(param)
-    %Check if the parameters have been set correctly
-    [result, missing] = checkBatteryParameters(param{i});
-    if(result==0)
-        disp('Warning, there are missing parameters in the param array.')
-        disp('Here below there is the list of such parameters:')
-        for jj=1:length(missing)
-            disp(missing{jj});
-        end
-        error('Please fix the problem and restart the script')
-    end
-end
-
+% If enabled, print the header information
 if(param{1}.PrintHeaderInfo==1)
-    clc
-    fprintf('/------------------------------------\\\n')
-    fprintf('|                                    |\n')
-    fprintf('|            LIONSIMBA               |\n')
-    fprintf('|            Toolbox                 |\n')
-    fprintf('|            version %s           |\n',version)
-    fprintf('|                                    |\n')
-    fprintf('\\------------------------------------/\n')
-    fprintf('Copyright (C) 2015-%d by M.Torchio, L.Magni, B.Gopaluni, R.D.Braatz and D.M.Raimondo\n\n',str2double(datestr(now,'yyyy'))+1)
-    fprintf('Send bug reports, questions or comments to marcello.torchio01@ateneopv.it\n')
-    fprintf('Updates available at the web page http://sisdin.unipv.it/labsisdin/lionsimba.php\n\n')
+    headerInfo(version)
 end
 
 % If everything is ok, let's start to simulate.
@@ -167,6 +144,7 @@ opt_fsolve.FunValCheck  = 'on';
 n_diff          = zeros(n_cells,1);
 n_alg           = zeros(n_cells,1);
 start_x_index   = 1;
+start_xp_index  = 1;
 
 % For each cell, allcoate memory to store external functions used to
 % estimate the SOC.
@@ -197,111 +175,28 @@ for i=1:n_cells
     param{i}.deltax_n      = 1 / param{i}.Nn;
     param{i}.deltax_co     = 1 / param{i}.Nco;
     
-    % Store the indices of the unknown variables
-    param{i}.ce_indices         = (1:param{i}.Nsum);
+    % Compute the indices where the differential and algebraic variables
+    % are stored.
+    param{i} = computeVariablesIndices(param{i});
     
-    % Modify the solid phase indices according to the model used. If Fick's
-    % law is used, then it is necessary to account also for the diffusion
-    % inside the solid particles.
-    if(param{i}.SolidPhaseDiffusion==1 || param{i}.SolidPhaseDiffusion==2)
-        param{i}.cs_average_indices = (param{i}.ce_indices(end)+1:param{i}.ce_indices(end)+param{i}.Np+param{i}.Nn);
-    elseif(param{i}.SolidPhaseDiffusion==3)
-        param{i}.cs_average_indices = (param{i}.ce_indices(end)+1:param{i}.ce_indices(end)+param{i}.Np*param{i}.Nr_p+param{i}.Nn*param{i}.Nr_n);
-    end
+    % Preallocate the differentiation matrices used for the solid phase
+    % potential.
+    param{i} = solidPhaseDifferentiationMatrices(param{i});
     
-    param{i}.T_indices          = (param{i}.cs_average_indices(end)+1:param{i}.cs_average_indices(end)+param{i}.Nal+param{i}.Nsum+param{i}.Nco);
-    param{i}.film_indices       = (param{i}.T_indices(end)+1:param{i}.T_indices(end)+param{i}.Nn);
-    param{i}.Q_indices          = (param{i}.film_indices(end)+1:param{i}.film_indices(end)+param{i}.Np+param{i}.Nn);
-    
-    
-    param{i}.jflux_indices      = (param{i}.Q_indices(end)+1:param{i}.Q_indices(end)+param{i}.Np+param{i}.Nn);
-    param{i}.Phis_indices       = (param{i}.jflux_indices(end)+1:param{i}.jflux_indices(end)+param{i}.Np+param{i}.Nn);
-    param{i}.Phie_indices       = (param{i}.Phis_indices(end)+1:param{i}.Phis_indices(end)+param{i}.Np+param{i}.Ns+param{i}.Nn);
-    param{i}.js_indices         = (param{i}.Phie_indices(end)+1:param{i}.Phie_indices(end)+param{i}.Nn);
-    param{i}.Iapp_indices       = (param{i}.js_indices(end)+1);
-    
-    % Phis matrices preallocation. Given that in the proposed code the
-    % solid phase conductivity is considered to be constant across the cell
-    % length, the discretization matrices can be assembled only once and
-    % used later in the code.
-    
-    % A matrix for the positive electrode
-    c = ones(param{i}.Np-1,1);
-    d = -2*ones(param{i}.Np,1);
-    
-    A_p 				= gallery('tridiag',c,d,c);
-    A_p(1,1) 			= -1;
-    A_p(end,end-1:end) 	= [1 -1];
-    
-    % A matrix for the negative electrode
-    c = ones(param{i}.Nn-1,1);
-    d = -2*ones(param{i}.Nn,1);
-    
-    A_n 			= gallery('tridiag',c,d,c);
-    A_n(1,1) 		= -1;
-    A_n(end,end) 	= -1;
-    
-    % Store the matrices in the param structure for future usage for each
-    % cell in the pack.
-    param{i}.A_p = A_p;
-    param{i}.A_n = A_n;
-    
-    % Precompute the discretization points for the solid particles.
-    % These data will be used when Fick's law of diffusion is considered.
-    param{i}.Rad_position_p  = linspace(0,param{i}.Rp_p,param{i}.Nr_p)';
-    param{i}.Rad_position_n  = linspace(0,param{i}.Rp_n,param{i}.Nr_n)';
-    
-    % Precompute the matrices used for the numerical differentiation. These matrices
-    % will be used when Fick's law is considered.
-    [param{i}.FO_D_p,param{i}.FO_D_c_p] = firstOrderDerivativeMatrix(0,param{i}.Rp_p,param{i}.Nr_p);
-    [param{i}.FO_D_n,param{i}.FO_D_c_n] = firstOrderDerivativeMatrix(0,param{i}.Rp_n,param{i}.Nr_n);
-    
-    % Precompute the matrices used for the numerical differentiation. These matrices
-    % will be used when Fick's law is considered.
-    [param{i}.SO_D_p,param{i}.SO_D_c_p,param{i}.SO_D_dx_p] = secondOrderDerivativeMatrix(0,param{i}.Rp_p,param{i}.Nr_p);
-    [param{i}.SO_D_n,param{i}.SO_D_c_n,param{i}.SO_D_dx_n] = secondOrderDerivativeMatrix(0,param{i}.Rp_n,param{i}.Nr_n);
+    % Preallocate the differentiation matrices used for the solid phase
+    % diffusion in case of Fick's law.
+    param{i} = solidPhaseDiffusionDifferentiationMatrices(param{i});
     
     % Init the value of the injected current.
     param{i}.I = param{1}.getCurr(0,t0,tf,param{1}.extraData);
     
     %% Initial conditions
-    % Initial differential states
-    % Check the type of model used for solid diffusion
-    if(param{i}.SolidPhaseDiffusion==1 || param{i}.SolidPhaseDiffusion==2)
-        % This initialization is used when reduced models are employed
-        cs_average_init     = [param{i}.cs_p_init*ones(param{i}.Np,1);param{i}.cs_n_init*ones(param{i}.Nn,1)];
-    elseif (param{i}.SolidPhaseDiffusion==3)
-        % If the full model is used (Fick's law), then the initial conditions are
-        % modified in order to account for the solid phase diffusion
-        % equation structure.
-        cs_average_init     = [param{i}.cs_p_init*ones(param{i}.Np*param{i}.Nr_p,1);param{i}.cs_n_init*ones(param{i}.Nn*param{i}.Nr_n,1)];
-    end
-    % Initial values for the other differential variables.
-    ce_init             = param{i}.ce_init*[ones(param{i}.Np,1);ones(param{i}.Ns,1);ones(param{i}.Nn,1)];
-    T_init              = param{i}.T_init * ones(param{i}.Nsum+param{i}.Nal+param{i}.Nco,1);
-    film_init           = zeros(param{i}.Nn,1);
-    Q_init              = zeros(param{i}.Np+param{i}.Nn,1);
     
-    % Store the number of differential variables in each cell.
-    n_diff(i) = sum([length(cs_average_init) length(ce_init) length(T_init) length(film_init) length(Q_init)]);
+    % Initial conditions for the differential states
+    [cs_average_init, ce_init, T_init, film_init, Q_init, n_diff(i)] =   differentialInitialConditions(param{i});
     
-    % Initial guess for the algebraic variables
-    jflux_init          = [-0.43e-5*ones(param{i}.Np,1);0.483e-5*ones(param{i}.Nn,1)];
-    Phis_init           = [4.2*ones(param{i}.Np,1);0.074*ones(param{i}.Nn,1)];
-    Phie_init           = zeros(param{i}.Nsum,1);
-    js_init             = 0.483e-5*ones(param{i}.Nn,1);
-    I_app               = 1;
-    
-    % Build the array of algebraic initial conditions
-    x0_alg              = [
-        jflux_init;...
-        Phis_init;...
-        Phie_init;...
-        js_init;...
-        I_app
-        ];
-    
-    n_alg(i) = length(x0_alg);
+    % Initial guesses for the algebraic variables
+    [x0_alg, n_alg(i)] =   algebraicInitialConditions(param{i});
     
     % Store the number of differential and algebraic variables for each cell.
     param{i}.ndiff = n_diff(i);
@@ -318,11 +213,17 @@ for i=1:n_cells
         Y0  = [Y0;Yt0];
         YP0 = [YP0;zeros(size(Yt0))];
     end
-    % The x_index variable will be used in the battery model file in
-    % order to distinguish among the different variables.
+    % The x_index variable will be used in the battery model file
+    % for indexing purposes
     param{i}.x_index    = (start_x_index:n_diff(i)+n_alg(i)+start_x_index-1);
-    %     param{i}.T_indices  = T_indices;
+    
+    param{i}.xp_index   = (start_xp_index:n_diff(i)+start_xp_index-1);
+    % Update the starting x_index value for the (possible) next cell
     start_x_index       = n_diff(i)+n_alg(i)+start_x_index;
+    
+    start_xp_index      = n_diff(i)+start_xp_index;
+    
+    param{i}.useSymbolic = 0;
 end
 
 if(n_cells==1)

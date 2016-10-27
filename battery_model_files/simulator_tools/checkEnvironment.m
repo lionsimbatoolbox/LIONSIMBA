@@ -17,7 +17,7 @@ if(num_arg==0)
     error('Type help startSimulation')
 end
 
-if(num_arg == 3 && param.AppliedCurrent == 1)
+if(num_arg == 3 && param{1}.AppliedCurrent == 1)
     error('For constant input currents, please provide the current density as a parameter to startSimulation')
 end
 
@@ -40,5 +40,20 @@ catch e
 end
 
 disp('CasADi Package FOUND!');
+
+
+% For each parameter structure, check if all the fields are set.
+for i=1:length(param)
+    %Check if the parameters have been set correctly
+    [result, missing] = checkBatteryParameters(param{i});
+    if(result==0)
+        disp('Warning, there are missing parameters in the param array.')
+        disp('Here below there is the list of such parameters:')
+        for jj=1:length(missing)
+            disp(missing{jj});
+        end
+        error('Please fix the problem and restart the script')
+    end
+end
 
 end
