@@ -53,7 +53,7 @@ param.Ds = 7.5e-10;
 % Negative Side
 param.Dn = 7.5e-10;
 
-%% Density [g / m^3 ]
+%% Density [kg / m^3 ]
 % Aluminium current collector
 param.rho_al = 2700;
 % Positive electrode
@@ -340,7 +340,7 @@ param.i_0_jside         = 0.80e-10;
 param.Uref_s            = 0.4;
 % 1C current for the particular chemistry [A/m^2]
 param.I1C 				= 29.5;
-% Weigth used in the aging dynamics
+% Weight used in the aging dynamics
 param.w 				= 2;
 
 
