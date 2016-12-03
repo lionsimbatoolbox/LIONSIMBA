@@ -8,7 +8,7 @@
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % THERMALMODEL evaluates the set of equations for the thermal dynamics.
-function [res_dT] = thermalModel(ce,Phie,Phis,Keff,jflux,T,dT,Up,Un,dudt_p,dudt_n,param)
+function [res_dT, rhsT] = thermalModel(ce,Phie,Phis,Keff,jflux,T,dT,Up,Un,dudt_p,dudt_n,param)
 
 % Effective electrolyte conductivities
 Keff_p = Keff(1:param.Np);
@@ -205,7 +205,8 @@ predT = [param.rho_al*param.Cpal*ones(param.Nal,1);...
     param.rho_co*param.Cpco*ones(param.Nco,1);...
     ];
 
-res_dT = dT - (1./predT.*(A_tot*T) + 1./predT.*Qrev_tot + 1./predT.*Qrxn_tot + 1./predT.*Qohm_tot + 1./predT.*BC);
+rhsT    = (1./predT.*(A_tot*T) + 1./predT.*Qrev_tot + 1./predT.*Qrxn_tot + 1./predT.*Qohm_tot + 1./predT.*BC);
+res_dT  = dT - rhsT;
 
 
 end

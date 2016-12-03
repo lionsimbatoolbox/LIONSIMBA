@@ -94,8 +94,7 @@ param.eps_p     = 0.385;
 param.eps_s     = 0.724;
 % Negative electrode
 param.eps_n     = 0.485;
-% Do not remove this array. It's used within the code.
-param.eps_i     = [param.eps_p;param.eps_s;param.eps_n];
+
 
 %% Volume fraction
 param.eps_fi    = [0.025;0;0.0326];
@@ -142,13 +141,11 @@ param.hcell     = 1;
 
 %% Maximum concentration of Li-ions in the solid phase [ mol/m^3 ]
 % Positive electrode
-cs_maxp   = 51554;
+param.cs_maxp   = 51554;
 % Separator
-cs_maxs   = 0;
+param.cs_maxs   = 0;
 % Negative electrode
-cs_maxn   = 30555;
-% Build the parameters array
-param.cs_max    = [cs_maxp;cs_maxs;cs_maxn];
+param.cs_maxn   = 30555;
 
 % Solid particle radius [m] - It's equal for the positive and negative electrode
 param.Rp_p     = 2e-6;
@@ -162,7 +159,7 @@ param.sig    = [100;... % Positive electrode
     ];
 
 % Effective solid phase conductivities
-param.sig_eff = param.sig.*(1 - param.eps_i - param.eps_fi);
+param.sig_eff = param.sig.*(1 - [param.eps_p;param.eps_s;param.eps_n] - param.eps_fi);
 
 %% Activation Energy for Temperature Dependent Solid Phase Diffusion [ J / mol ]
 
@@ -179,7 +176,6 @@ param.Eakip  = 5000;
 
 % Negative electrode
 param.Eakin  = 5000;
-
 
 
 %% Initial conditions
@@ -354,5 +350,23 @@ param.UseJacobian       = 1;
 % integration process. If not provided, with UseJacobian=1, the code will
 % compute the Jacobian on its own.
 param.JacobianFunction = [];
+
+
+% Type of the DAE system returned by LIONSIMBA
+% Admitted values are:
+%                       1 - The equations are returned in an analytical
+%                       form, written as implicit DAEs, i.e.
+%
+%                       x_dot - f(x,z) | Time differential equations
+%                       z - g(x,z)     | Algebraic equations
+%
+%                       2 - The equations are returned in an analytical
+%                       form, where time differential equations are written
+%                       in an explicit form, i.e.
+%
+%                       f(x,z)         | Time differential equations
+%                       z - g(x,z)     | Algebraic equations
+%
+param.daeFormulation = 1;
 
 end

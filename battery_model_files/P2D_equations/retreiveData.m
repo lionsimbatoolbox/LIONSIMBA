@@ -37,7 +37,7 @@ function [ce_t, cs_barrato_t, T_t, jflux_t, Phis_t, Phie_t, cs_star_t, SOC_t, fi
         end
     end
     Csout           = sum(cs_average);
-    Sout            = 100*(1/param.len_n*(param.len_n/(param.Nn))*Csout/param.cs_max(3));
+    Sout            = 100*(1/param.len_n*(param.len_n/(param.Nn))*Csout/param.cs_maxn);
     cs_star_t       = [cs_star_t;surfaceConcentration(cs_barrato_t(end,:)',jflux_t(end,:)',Q_t(end,:)',T_t(end,:)',param)'];
     SOC_t           = [SOC_t;Sout];
     t_tot           = [t_tot;t];

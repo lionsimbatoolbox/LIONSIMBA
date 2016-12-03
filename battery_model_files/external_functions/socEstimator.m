@@ -30,6 +30,6 @@ function Sout = socEstimator(t,t0,tf,states,extraData,param)
     end
     % Estimates the SOC according to the current information of the states.
     Csout= sum(cs_average);
-    Sout = 100*(1/param.len_n*(param.len_n/(param.Nn))*Csout/param.cs_max(3));
+    Sout = 100*(1/param.len_n*(param.len_n/(param.Nn))*Csout/param.cs_maxn);
 
 end

@@ -28,7 +28,7 @@
 function [U_p,dudt_p,U_n,dudt_n] = openCircuitPotential(cs_star,T,param)
 	% Calculate the open circuit voltage of the battery in the positive
 	% electrode
-	theta_p  = cs_star(1:param.Np)./param.cs_max(1);
+	theta_p  = cs_star(1:param.Np)./param.cs_maxp;
 
 	% Compute the variation of OCV with respect to temperature variations [V/K]
 	dudt_p   = -0.001 * (0.199521039-0.928373822*theta_p + 1.364550689000003*theta_p.^2-0.6115448939999998*theta_p.^3);
@@ -42,7 +42,7 @@ function [U_p,dudt_p,U_n,dudt_n] = openCircuitPotential(cs_star,T,param)
 
 	% Calculate the open circuit voltage of the battery in the negative
 	% electrode
-	theta_n  = cs_star(param.Np+1:end)./ param.cs_max(3);
+	theta_n  = cs_star(param.Np+1:end)./ param.cs_maxn;
 
 	% Compute the variation of OCV with respect to temperature variations [V/K]
 	dudt_n = 0.001*(0.005269056 +3.299265709*theta_n-91.79325798*theta_n.^2+1004.911008*theta_n.^3-5812.278127*theta_n.^4 + ...

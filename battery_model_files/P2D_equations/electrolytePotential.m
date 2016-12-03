@@ -21,9 +21,9 @@ Keff_s = param.ElectrolyteConductivityFunction(ce(param.Np+1:param.Np+param.Ns),
 Keff_n = param.ElectrolyteConductivityFunction(ce(param.Np+param.Ns+1:end),T(param.Nal+param.Np+param.Ns+1:end-param.Nco),param,'n');
 
 % Uncomment this for benchmark purposes
-% Keff_p = param.eps_i(1)^param.brugg_p *(4.1253*1e-2 + 5.007*1e-4*ce(1:param.Np) - 4.7212*1e-7*ce(1:param.Np).^2 +1.5094*1e-10*ce(1:param.Np).^3 -1.6018*1e-14*ce(1:param.Np).^4);
-% Keff_s = param.eps_i(2)^param.brugg_s *(4.1253*1e-2 + 5.007*1e-4*ce(param.Np+1:param.Np+param.Ns) - 4.7212*1e-7*ce(param.Np+1:param.Np+param.Ns).^2 +1.5094*1e-10*ce(param.Np+1:param.Np+param.Ns).^3 -1.6018*1e-14*ce(param.Np+1:param.Np+param.Ns).^4);
-% Keff_n = param.eps_i(3)^param.brugg_n *(4.1253*1e-2 + 5.007*1e-4*ce(param.Np+param.Ns+1:end) - 4.7212*1e-7*ce(param.Np+param.Ns+1:end).^2 +1.5094*1e-10*ce(param.Np+param.Ns+1:end).^3 -1.6018*1e-14*ce(param.Np+param.Ns+1:end).^4);
+% Keff_p = param.eps_p^param.brugg_p *(4.1253*1e-2 + 5.007*1e-4*ce(1:param.Np) - 4.7212*1e-7*ce(1:param.Np).^2 +1.5094*1e-10*ce(1:param.Np).^3 -1.6018*1e-14*ce(1:param.Np).^4);
+% Keff_s = param.eps_s^param.brugg_s *(4.1253*1e-2 + 5.007*1e-4*ce(param.Np+1:param.Np+param.Ns) - 4.7212*1e-7*ce(param.Np+1:param.Np+param.Ns).^2 +1.5094*1e-10*ce(param.Np+1:param.Np+param.Ns).^3 -1.6018*1e-14*ce(param.Np+1:param.Np+param.Ns).^4);
+% Keff_n = param.eps_n^param.brugg_n *(4.1253*1e-2 + 5.007*1e-4*ce(param.Np+param.Ns+1:end) - 4.7212*1e-7*ce(param.Np+param.Ns+1:end).^2 +1.5094*1e-10*ce(param.Np+param.Ns+1:end).^3 -1.6018*1e-14*ce(param.Np+param.Ns+1:end).^4);
 
         
 Keff = [Keff_p;Keff_s;Keff_n];

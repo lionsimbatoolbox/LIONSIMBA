@@ -61,10 +61,6 @@ for i=1:n_cells
     % App current
     I_app       = x(param.Iapp_indices);
     
-    if(param.useSymbolic)
-        symParams = x(param.params_indices);
-    end
-    
     % Electrolyte concentration derivative
     dCe         = xp(param.ce_indices,1);
     % Average surface concentration derivative
@@ -106,7 +102,7 @@ for i=1:n_cells
                 deltax_dx = param_tot{i+1}.len_al*param_tot{i+1}.deltax_al;
                 % Find the overall distance between the two adjacent nodes
                 % in the two different cells.
-                deltax_tot = (deltax_sx/2+deltax_dx/2); 
+                deltax_tot = (deltax_sx/2+deltax_dx/2);
                 % Find the Harmonic Mean of the heat transfer coefficients
                 beta = (deltax_sx/2)/deltax_tot;
                 Lambda_star = (param.Lambda_co*param_tot{i+1}.Lambda_al)/(beta*param_tot{i+1}.Lambda_al + (1-beta)*param.Lambda_co);
@@ -122,7 +118,7 @@ for i=1:n_cells
                 deltax_dx = param.len_al*param.deltax_al;
                 % Find the overall distance between the two adjacent nodes
                 % in the two different cells.
-                deltax_tot = (deltax_sx/2+deltax_dx/2); 
+                deltax_tot = (deltax_sx/2+deltax_dx/2);
                 % Find the Harmonic Mean of the heat transfer coefficients
                 beta = (deltax_sx/2)/deltax_tot;
                 Lambda_star = (param.Lambda_al*param_tot{i-1}.Lambda_co)/(beta*param.Lambda_al + (1-beta)*param_tot{i-1}.Lambda_co);
@@ -136,7 +132,7 @@ for i=1:n_cells
                 deltax_dx = param_tot{i+1}.len_al*param_tot{i+1}.deltax_al;
                 % Find the overall distance between the two adjacent nodes
                 % in the two different cells.
-                deltax_tot = (deltax_sx/2+deltax_dx/2); 
+                deltax_tot = (deltax_sx/2+deltax_dx/2);
                 % Find the Harmonic Mean of the heat transfer coefficients
                 beta = (deltax_sx/2)/deltax_tot;
                 Lambda_star = (param.Lambda_co*param_tot{i+1}.Lambda_al)/(beta*param_tot{i+1}.Lambda_al + (1-beta)*param.Lambda_co);
@@ -150,7 +146,7 @@ for i=1:n_cells
                 deltax_dx = param.len_al*param.deltax_al;
                 % Find the overall distance between the two adjacent nodes
                 % in the two different cells.
-                deltax_tot = (deltax_sx/2+deltax_dx/2); 
+                deltax_tot = (deltax_sx/2+deltax_dx/2);
                 % Find the Harmonic Mean of the heat transfer coefficients
                 beta = (deltax_sx/2)/deltax_tot;
                 Lambda_star = (param.Lambda_al*param_tot{i-1}.Lambda_co)/(beta*param.Lambda_al + (1-beta)*param_tot{i-1}.Lambda_co);
@@ -168,33 +164,42 @@ for i=1:n_cells
     [dxalg,Up,Un,dudt_p,dudt_n,Keff,J_S] = algebraicStates(x0_alg,ce,cs_barrato,Q,T,film,param);
     
     % Evaluate the residual for the electrolyte concentration
-    resCe = electrolyteDiffusion(t,ce,dCe,jflux + [zeros(param.Np,1);J_S],T,param);
+    [resCe,rhsCe] = electrolyteDiffusion(t,ce,dCe,jflux + [zeros(param.Np,1);J_S],T,param);
     % Evaluate the residual for the average surface concentration
-    resCs = electrodeConcentration(dCs,cs_barrato,T,jflux,param);
+    [resCs, rhsCs] = electrodeConcentration(dCs,cs_barrato,T,jflux,param);
     
     % Check the type of Solid Diffusion Approximation to be used.
     if(param.SolidPhaseDiffusion==2)
-        resdQ = volumeAveragedConcentrationFlux(dQ,Q,jflux,T,param);
+        [resdQ, rhsQ] = volumeAveragedConcentrationFlux(dQ,Q,jflux,T,param);
     else
-        resdQ = dQ;
+        resdQ   = dQ;
+        rhsQ    = zeros(length(dQ),1);
     end
     
     % Ageing effects take place only during charging processes
     if(param.EnableAgeing==1 && param.I >0)
         % Film thickness
-        resDfilm = SEI_layer(dFilm, J_S, param);
+        [resDfilm, rhsDfilm] = SEI_layer(dFilm, J_S, param);
     else
-        resDfilm = dFilm;
+        resDfilm    = dFilm;
+        rhsDfilm    = zeros(length(resDfilm),1);
     end
     % Check if the temperature dynamics are enabled.
     if(param.TemperatureEnabled==1)
         % Evaluate the residuals for the temperature
-        resdT = thermalModel(ce,Phie,Phis,Keff,jflux+ [zeros(param.Np,1);J_S],T,dT,Up,Un,dudt_p,dudt_n,param);
+        [resdT, rhsT] = thermalModel(ce,Phie,Phis,Keff,jflux+ [zeros(param.Np,1);J_S],T,dT,Up,Un,dudt_p,dudt_n,param);
     else
         % Return constant value for the temperature
-        resdT = dT;
+        resdT   = dT;
+        rhsT    = zeros(length(dT),1);
     end
-    % Build the residuals array.
-    dx_tot = [dx_tot;resCe;resCs;resdT;resDfilm;resdQ;dxalg];
+    
+    if(param_tot{1}.daeFormulation==1)
+        % Return the residuals array
+        dx_tot = [dx_tot;resCe;resCs;resdT;resDfilm;resdQ;dxalg];
+    elseif(param_tot{1}.daeFormulation==2)
+        % Return the RHSs of the equations
+        dx_tot = [dx_tot;rhsCe;rhsCs;rhsT;rhsDfilm;rhsQ;dxalg];
+    end
 end
 end

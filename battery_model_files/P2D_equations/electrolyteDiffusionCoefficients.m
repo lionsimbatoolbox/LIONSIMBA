@@ -33,20 +33,20 @@ function Deff = electrolyteDiffusionCoefficients(ce,T,param,batterySection)
 if(param.TemperatureEnabled==1)
     switch(batterySection)
         case 'p'
-            Deff = param.eps_i(1)^param.brugg_p*1e-4*10.^((-4.43-54./(T-229-5e-3*ce)-0.22e-3*ce));
+            Deff = param.eps_p^param.brugg_p*1e-4*10.^((-4.43-54./(T-229-5e-3*ce)-0.22e-3*ce));
         case 's'
-            Deff = param.eps_i(2)^param.brugg_s*1e-4*10.^((-4.43-54./(T-229-5e-3*ce)-0.22e-3*ce));
+            Deff = param.eps_s^param.brugg_s*1e-4*10.^((-4.43-54./(T-229-5e-3*ce)-0.22e-3*ce));
         case 'n'
-            Deff = param.eps_i(3)^param.brugg_n*1e-4*10.^((-4.43-54./(T-229-5e-3*ce)-0.22e-3*ce));
+            Deff = param.eps_n^param.brugg_n*1e-4*10.^((-4.43-54./(T-229-5e-3*ce)-0.22e-3*ce));
     end
 else
     switch(batterySection)
         case 'p'
-            Deff = repmat(param.Dp*param.eps_i(1)^param.brugg_p,param.Np,1);
+            Deff = repmat(param.Dp*param.eps_p^param.brugg_p,param.Np,1);
         case 's'
-            Deff = repmat(param.Ds*param.eps_i(2)^param.brugg_s,param.Ns,1);
+            Deff = repmat(param.Ds*param.eps_s^param.brugg_s,param.Ns,1);
         case 'n'
-            Deff = repmat(param.Dn*param.eps_i(3)^param.brugg_n,param.Nn,1);
+            Deff = repmat(param.Dn*param.eps_n^param.brugg_n,param.Nn,1);
     end
 end
 

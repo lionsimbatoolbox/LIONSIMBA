@@ -32,8 +32,4 @@ param.Phie_indices       = (param.Phis_indices(end)+1:param.Phis_indices(end)+pa
 param.js_indices         = (param.Phie_indices(end)+1:param.Phie_indices(end)+param.Nn);
 param.Iapp_indices       = (param.js_indices(end)+1);
 
-if(isfield(param,'symbolic_param_num'))
-    param.params_indices = (param.Iapp_indices(end)+1:param.Iapp_indices(end)+param.symbolic_param_num);
-end
-
 end

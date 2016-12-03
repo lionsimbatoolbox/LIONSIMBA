@@ -27,22 +27,22 @@ function Keff = electrolyteConductivity(ce,T,param,batterySection)
 if(param.TemperatureEnabled==1)
     switch(batterySection)
         case'p'
-            Keff = param.eps_i(1)^param.brugg_p *(1e-4*ce.*((-10.5+0.668*1e-3*ce+0.494*1e-6*ce.^2) +...
+            Keff = param.eps_p^param.brugg_p *(1e-4*ce.*((-10.5+0.668*1e-3*ce+0.494*1e-6*ce.^2) +...
                 (0.074  -1.78*1e-5*ce -8.86*1e-10*ce.^2).*T + (-6.96*1e-5+2.8*1e-8*ce).*T.^2).^2);
         case 's'
-            Keff = param.eps_i(2)^param.brugg_s *(1e-4*ce.*((-10.5+0.668*1e-3*ce+0.494*1e-6*ce.^2) +...
+            Keff = param.eps_s^param.brugg_s *(1e-4*ce.*((-10.5+0.668*1e-3*ce+0.494*1e-6*ce.^2) +...
                 (0.074  -1.78*1e-5*ce -8.86*1e-10*ce.^2).*T + (-6.96*1e-5+2.8*1e-8*ce).*T.^2).^2);
         case 'n'
-            Keff = param.eps_i(3)^param.brugg_n *(1e-4*ce.*((-10.5+0.668*1e-3*ce+0.494*1e-6*ce.^2) +...
+            Keff = param.eps_n^param.brugg_n *(1e-4*ce.*((-10.5+0.668*1e-3*ce+0.494*1e-6*ce.^2) +...
                 (0.074  -1.78*1e-5*ce -8.86*1e-10*ce.^2).*T + (-6.96*1e-5+2.8*1e-8*ce).*T.^2).^2);
     end
 else
         switch(batterySection)
         case'p'
-            Keff = param.eps_i(1)^param.brugg_p *(4.1253*1e-2 + 5.007*1e-4*ce - 4.7212*1e-7*ce.^2 +1.5094*1e-10*ce.^3 -1.6018*1e-14*ce.^4);
+            Keff = param.eps_p^param.brugg_p *(4.1253*1e-2 + 5.007*1e-4*ce - 4.7212*1e-7*ce.^2 +1.5094*1e-10*ce.^3 -1.6018*1e-14*ce.^4);
         case 's'
-            Keff = param.eps_i(2)^param.brugg_s *(4.1253*1e-2 + 5.007*1e-4*ce - 4.7212*1e-7*ce.^2 +1.5094*1e-10*ce.^3 -1.6018*1e-14*ce.^4);
+            Keff = param.eps_s^param.brugg_s *(4.1253*1e-2 + 5.007*1e-4*ce - 4.7212*1e-7*ce.^2 +1.5094*1e-10*ce.^3 -1.6018*1e-14*ce.^4);
         case 'n'
-            Keff = param.eps_i(3)^param.brugg_n *(4.1253*1e-2 + 5.007*1e-4*ce - 4.7212*1e-7*ce.^2 +1.5094*1e-10*ce.^3 -1.6018*1e-14*ce.^4);
+            Keff = param.eps_n^param.brugg_n *(4.1253*1e-2 + 5.007*1e-4*ce - 4.7212*1e-7*ce.^2 +1.5094*1e-10*ce.^3 -1.6018*1e-14*ce.^4);
         end
 end

@@ -12,8 +12,15 @@ function param = solidPhaseDiffusionDifferentiationMatrices(param)
 
 % Precompute the discretization points for the solid particles.
 % These data will be used when Fick's law of diffusion is considered.
-param.Rad_position_p  = linspace(0,param.Rp_p,param.Nr_p)';
-param.Rad_position_n  = linspace(0,param.Rp_n,param.Nr_n)';
+param.Rad_position_p  = linspace(0,param.Rp_p,param.Nr_p);
+if(size(param.Rad_position_p,1)<size(param.Rad_position_p,2))
+    param.Rad_position_p = param.Rad_position_p';
+end
+
+param.Rad_position_n  = linspace(0,param.Rp_n,param.Nr_n);
+if(size(param.Rad_position_n,1)<size(param.Rad_position_n,2))
+    param.Rad_position_n = param.Rad_position_n';
+end
 
 % Precompute the matrices used for the numerical differentiation. These matrices
 % will be used when Fick's law is considered.

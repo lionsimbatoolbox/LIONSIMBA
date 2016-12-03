@@ -9,6 +9,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SEI_LAYER  Describes the dynamics of the Solid-Electrolyte layer at the anode side.
 
-function resDfilm = SEI_layer(dfilmThickness, jflux_side, param)
-	resDfilm = dfilmThickness - ( -jflux_side * param.M_n / (param.rho_n));
+function [resDfilm, rhsDfilm] = SEI_layer(dfilmThickness, jflux_side, param)
+rhsDfilm = ( -jflux_side * param.M_n / (param.rho_n));
+resDfilm = dfilmThickness - rhsDfilm;
 end

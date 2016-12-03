@@ -31,11 +31,15 @@ end
 % Check the input current value.
 if(param{1}.AppliedCurrent==1)
     if(~isreal(I) || isnan(I) || isinf(I) || isempty(I))
-        error('The input current provided is a complex value or NaN. Please check the value and restart.')
+        if(~isa(I,'casadi.MX'))
+            error('The input current provided is a complex value or NaN. Please check the value and restart.')
+        end
     end
 else
     error('getCasadiFormulation accepts only galvanostatic currents')
 end
+
+
 
 % Check for environmental tool availability
 checkEnvironment(param,nargin);
@@ -45,24 +49,15 @@ if(param{1}.PrintHeaderInfo==1)
     headerInfo(version)
 end
 
-if(~isfield(param{1},'symbolic_param_num'))
-    error('The param structure must contain the "symbolic_param_num" field');
-end
-
 % If everything is ok, let's start to simulate.
 rhs = mainCore(I,param);
 end
 
 
 
-function results = mainCore(I,param)
+function result = mainCore(I,param)
 import casadi.*
 
-
-
-% Store the original parameters structure in order to return it after the
-% end of the simulations.
-param_original  = param;
 
 % Get the total number of cells that have to be simulated.
 n_cells         = length(param);
@@ -76,8 +71,6 @@ if(param{1}.AppliedCurrent==3 && n_cells~=1)
     error('!!!ERROR!!! -- Potentiostatic simulations are only possible with single cell packs -- !!!ERROR!!!')
 end
 
-
-
 % Switch among the selected operating modes defining suitable getCurr
 % function. If multiple cells are required, the variable current profile
 % or its constant value are retreived from the first element of the
@@ -89,11 +82,6 @@ switch(param{1}.AppliedCurrent)
     otherwise
         param{1}.getCurr = @(t,t0,tf,extra)I;
 end
-
-% Define absolute and relative tolerances. If more cells are required,
-% these values are taken from the first parameters structure.
-opt.AbsTol      = param{1}.AbsTol;
-opt.RelTol      = param{1}.RelTol;
 
 % The Matlab function fsolve is used to initially solve the algebraic
 % equations by keeping constant the differential ones to their initial
@@ -107,11 +95,8 @@ n_alg           = zeros(n_cells,1);
 start_x_index   = 1;
 start_xp_index  = 1;
 
-% For each cell, allcoate memory to store external functions used to
-% estimate the SOC.
-SOC_estimate    = cell(n_cells,1);
 
-Y0 = [];
+Y0  = [];
 YP0 = [];
 % Perform several checks over the cells
 
@@ -120,16 +105,15 @@ xpvarsym_tot    = {};
 zvarsym_tot     = {};
 paramsym_tot    = {};
 for i=1:n_cells
-    
-    
-    param{i}.symbolic_parameters = MX.sym(['p_cell_',num2str(i)],param{i}.symbolic_param_num);
-    
+    if(~isfield(param{i},'symbolic_parameters'))
+        error('Whet getCasadiFormulation is called, the parameters structure must contain the field symbolic_parameters in which all the symbolical parameters have to be stored')
+    end
     % When Fick's law of diffusion is used, at least 10 discretization
     % points are required. Raise an error if this condition is not met.
     if((param{i}.Nr_p<10 || param{i}.Nr_n<10) && param{i}.SolidPhaseDiffusion==3)
         error('The number of discrete points for the paricles must be at least 10 in both cathode and anode.')
     end
-   
+    
     param{i}.Nsum      = param{i}.Np + param{i}.Ns + param{i}.Nn;
     param{i}.Nsum_nos  = param{i}.Np + param{i}.Nn;
     
@@ -166,7 +150,7 @@ for i=1:n_cells
     % Store the number of differential and algebraic variables for each cell.
     param{i}.ndiff = n_diff(i);
     param{i}.nalg  = n_alg(i);
-
+    
     % Solve the algebraic equations to find a set of semi-consistent initial
     % conditions for the algebraic equations. This will help the DAE solver as
     % a warm startup.
@@ -180,99 +164,44 @@ for i=1:n_cells
     
     xvarsym_tot     = {xvarsym_tot{:}, xvarsym};
     zvarsym_tot     = {zvarsym_tot{:}, zvarsym};
+    
     paramsym_tot    = {paramsym_tot{:}, param{i}.symbolic_parameters};
     % Build the initial values array for the integrator
     Yt0 = [ce_init;cs_average_init;T_init;film_init;Q_init];
     
-    init_point = algebraic_root{i}(x0_alg,Yt0,param{i}.symbolic_parameters);
+    
     Y0  = [Y0;Yt0];
     YP0 = [YP0;zeros(size(Yt0))];
     
     
-    
     % The x_index variable will be used in the battery model file
     % for indexing purposes
-    param{i}.x_index    = (start_x_index:n_diff(i)+n_alg(i)+param{i}.symbolic_param_num+start_x_index-1);
+    param{i}.x_index    = (start_x_index:n_diff(i)+n_alg(i)+start_x_index-1);
     param{i}.xp_index   = (start_xp_index:n_diff(i)+start_xp_index-1);
     
     % Update the starting x_index value for the (possible) next cell
     start_x_index       = n_diff(i)+n_alg(i)+start_x_index;
     start_xp_index      = n_diff(i)+start_xp_index;
     
-    param{i}.useSymbolic = 1;
 end
 
-if(n_cells==1)
-    nc = ' cell';
-else
-    nc = ' cells';
-end
-
-
-% This flag is used to notify the reason of the simulation stop. If 0
-% everything went well.
-exit_reason     = 0;
 % Define the structure to be passed to the residual function
 dati.param  = param;
 dati.t0     = 0;
 dati.tf     = 10;
 
-[dx_tot, ~, ~] = batteryModel(0,vertcat([xvarsym_tot{:};zvarsym_tot{:};paramsym_tot{:}]),vertcat([xpvarsym_tot{:}]),dati);
+[dx_tot, ~, ~] = batteryModel(0,vertcat([xvarsym_tot{:};zvarsym_tot{:}]),vertcat([xpvarsym_tot{:}]),dati);
 
-% JacFun = [];
-% if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
-%     disp('Evaluating the analytical form of the Jacobian matrix. Please wait...')
-%     % Import casadi framework
-%     import casadi.*
-%     % Define the symbolic variables.
-%     xsym    = SX.sym('x',[sum(n_diff)+sum(n_alg),1]);
-%     xpsym   = SX.sym('xp',[sum(n_diff)+sum(n_alg),1]);
-%     cj      = SX.sym('cj',1);
-% %     keyboard
-%     % Get the model equations in a symbolic way
-%     [dx_tot, ~, ~] = batteryModel(0,xsym,xpsym,dati);
-%     
-%     % Evaluate the Jacobian matrix
-%     J = jacobian(dx_tot,xsym) + cj*jacobian(dx_tot,xpsym);
-%     
-%     %Define a function for the Jacobian evaluation
-%     JacFun = Function('fJ',{xsym,cj},{J});
-%     
-%     % Pass this function pointer to the routine that IDA will call for the
-%     % evaluation of the Jacobian values.
-%     dati.fJ = JacFun;
-%     
-%     % Define the options for Sundials
-%     options = IDASetOptions('RelTol',opt.RelTol,...
-%         'AbsTol',opt.AbsTol,...
-%         'MaxNumSteps',1500,...
-%         'VariableTypes',id,...
-%         'UserData',dati,...
-%         'JacobianFn',@djacfn);
-%     
-% elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
-%     disp('Analytical function of the Jacobian matrix provided by the user.')
-%     % If the Jacobian has been provided from the user, use it.
-%     JacFun = param{1}.JacobianFunction;
-%     
-%     % Pass this function pointer to the routine that IDA will call for the
-%     % evaluation of the Jacobian values.
-%     dati.fJ = JacFun;
-%     
-%     % Define the options for Sundials
-%     options = IDASetOptions('RelTol',opt.RelTol,...
-%         'AbsTol',opt.AbsTol,...
-%         'MaxNumSteps',1500,...
-%         'VariableTypes',id,...
-%         'UserData',dati,...
-%         'JacobianFn',@djacfn);
-% else
-%     % Define the options for Sundials
-%     options = IDASetOptions('RelTol',opt.RelTol,...
-%         'AbsTol',opt.AbsTol,...
-%         'MaxNumSteps',1500,...
-%         'VariableTypes',id,...
-%         'UserData',dati);
-% end
+
+result.x_vars       = vertcat([xvarsym_tot{:}]);
+result.z_vars       = vertcat([zvarsym_tot{:}]);
+result.xp_vars      = vertcat([xpvarsym_tot{:}]);
+result.param_vars   = vertcat([paramsym_tot{:}]);
+result.ode          = dx_tot(1:n_diff(1));
+result.ae           = dx_tot(n_diff(1)+1:end);
+result.x0           = Y0;
+result.z0           = x0_alg;
+result.rootFunction = algebraic_root;
+result.param        = param;
 
 end

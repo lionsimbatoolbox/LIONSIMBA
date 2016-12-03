@@ -96,8 +96,6 @@ end
 results = mainCore(t0,tf,initialState,I,param);
 end
 
-
-
 function results = mainCore(t0,tf,initialState,I,param)
 
 % Store the original parameters structure in order to return it after the
@@ -152,6 +150,11 @@ SOC_estimate    = cell(n_cells,1);
 
 % Perform several checks over the cells
 for i=1:n_cells
+    % Check the daeFormulation flag in case startSimulation is called
+    if(param{i}.daeFormulation~=1)
+        error(['Make sure that the daeFormulation flag is set to 1 for each cell parameters structure. Cell ', num2str(i),' does not respect this constraint.'])
+    end
+    
     % When Fick's law of diffusion is used, at least 10 discretization
     % points are required. Raise an error if this condition is not met.
     if((param{i}.Nr_p<10 || param{i}.Nr_n<10) && param{i}.SolidPhaseDiffusion==3)
@@ -175,19 +178,20 @@ for i=1:n_cells
     param{i}.deltax_n      = 1 / param{i}.Nn;
     param{i}.deltax_co     = 1 / param{i}.Nco;
     
-    % Compute the indices where the differential and algebraic variables
-    % are stored.
+    % Compute the indices used to store the positions of the differential
+    % and algebraic variables.
     param{i} = computeVariablesIndices(param{i});
     
     % Preallocate the differentiation matrices used for the solid phase
-    % potential.
+    % potential. This can be done here because such matrices are considered
+    % to be time invariant. 
     param{i} = solidPhaseDifferentiationMatrices(param{i});
     
     % Preallocate the differentiation matrices used for the solid phase
     % diffusion in case of Fick's law.
     param{i} = solidPhaseDiffusionDifferentiationMatrices(param{i});
     
-    % Init the value of the injected current.
+    % Initialize the value of the injected current density.
     param{i}.I = param{1}.getCurr(0,t0,tf,param{1}.extraData);
     
     %% Initial conditions
@@ -214,16 +218,15 @@ for i=1:n_cells
         YP0 = [YP0;zeros(size(Yt0))];
     end
     % The x_index variable will be used in the battery model file
-    % for indexing purposes
+    % for indexing purposes.
     param{i}.x_index    = (start_x_index:n_diff(i)+n_alg(i)+start_x_index-1);
     
     param{i}.xp_index   = (start_xp_index:n_diff(i)+start_xp_index-1);
+    
     % Update the starting x_index value for the (possible) next cell
     start_x_index       = n_diff(i)+n_alg(i)+start_x_index;
     
-    start_xp_index      = n_diff(i)+start_xp_index;
-    
-    param{i}.useSymbolic = 0;
+    start_xp_index      = n_diff(i)+n_alg(i)+start_xp_index;
 end
 
 if(n_cells==1)
@@ -263,12 +266,14 @@ yp_original     = YP0';
 % This flag is used to notify the reason of the simulation stop. If 0
 % everything went well.
 exit_reason     = 0;
+
 % Define the structure to be passed to the residual function
 dati.param  = param;
 dati.t0     = t0;
 dati.tf     = tf;
 
-% Define algebraic and differential variables. 1-> differential variables,
+% Define algebraic and differential variables. 
+% 1-> differential variables,
 % 0-> algebraic variables.
 id = [];
 for i=1:n_cells
@@ -276,7 +281,13 @@ for i=1:n_cells
 end
 
 JacFun = [];
+
+% This statement checks if the user wants to make use of the Jacobian
+% matrix and (if yes) it has been already provided or not as part of the
+% parameters structure.
 if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
+    % If the user wants to make use of the Jacobian, but it was not
+    % provided in the parameters structure, then evaluate a new Jacobian.
     disp('Evaluating the analytical form of the Jacobian matrix. Please wait...')
     % Import casadi framework
     import casadi.*
@@ -284,29 +295,35 @@ if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
     xsym    = SX.sym('x',[sum(n_diff)+sum(n_alg),1]);
     xpsym   = SX.sym('xp',[sum(n_diff)+sum(n_alg),1]);
     cj      = SX.sym('cj',1);
-%     keyboard
-    % Get the model equations in a symbolic way
+
+    % Get the model equations written in an implicit form in a symbolic way.
     [dx_tot, ~, ~] = batteryModel(0,xsym,xpsym,dati);
     
-    % Evaluate the Jacobian matrix
+    % Evaluate the Jacobian matrix. (Please refer to the Sundials guide for
+    % further information about the Jacobian structure).
     J = jacobian(dx_tot,xsym) + cj*jacobian(dx_tot,xpsym);
     
-    %Define a function for the Jacobian evaluation
+    % Define a function for the Jacobian evaluation for a given set of
+    % differential and algebraic variables.
     JacFun = Function('fJ',{xsym,cj},{J});
     
-    % Pass this function pointer to the routine that IDA will call for the
-    % evaluation of the Jacobian values.
+    % Store the function into a structure such that IDA will use it for the
+    % evaluation of the Jacobian matrix (see the definition of the function
+    % djacfn at the end of this file).
     dati.fJ = JacFun;
     
     % Define the options for Sundials
-    options = IDASetOptions('RelTol',opt.RelTol,...
-        'AbsTol',opt.AbsTol,...
-        'MaxNumSteps',1500,...
-        'VariableTypes',id,...
-        'UserData',dati,...
-        'JacobianFn',@djacfn);
+    options = IDASetOptions('RelTol'        , opt.RelTol,...
+                            'AbsTol'        , opt.AbsTol,...
+                            'MaxNumSteps'   , 1500,...
+                            'VariableTypes' , id,...
+                            'UserData'      , dati,...
+                            'JacobianFn'    , @djacfn);
     
 elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
+    % If the Jacobian wants to be used and also it has been provided in the
+    % parameters structure, just make use of it.
+    
     disp('Analytical function of the Jacobian matrix provided by the user.')
     % If the Jacobian has been provided from the user, use it.
     JacFun = param{1}.JacobianFunction;
@@ -316,19 +333,22 @@ elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
     dati.fJ = JacFun;
     
     % Define the options for Sundials
-    options = IDASetOptions('RelTol',opt.RelTol,...
-        'AbsTol',opt.AbsTol,...
-        'MaxNumSteps',1500,...
-        'VariableTypes',id,...
-        'UserData',dati,...
-        'JacobianFn',@djacfn);
+    options = IDASetOptions('RelTol'        , opt.RelTol,...
+                            'AbsTol'        , opt.AbsTol,...
+                            'MaxNumSteps'   , 1500,...
+                            'VariableTypes' , id,...
+                            'UserData'      , dati,...
+                            'JacobianFn'    , @djacfn);
 else
+    % In this case the user does not want to make use of the Jacobian
+    % matrix. A numerical approximation will be calculated instead.
+    
     % Define the options for Sundials
-    options = IDASetOptions('RelTol',opt.RelTol,...
-        'AbsTol',opt.AbsTol,...
-        'MaxNumSteps',1500,...
-        'VariableTypes',id,...
-        'UserData',dati);
+    options = IDASetOptions('RelTol'        , opt.RelTol,...
+                            'AbsTol'        , opt.AbsTol,...
+                            'MaxNumSteps'   , 1500,...
+                            'VariableTypes' , id,...
+                            'UserData'      , dati);
 end
 
 
@@ -386,7 +406,7 @@ while(t<tf)
     % refer to IDA manual for more information about syntax and its usage.
     tic
     [~, t, y]   = IDASolve(tf,'OneStep');
-    sim_time=sim_time+toc;
+    sim_time    = sim_time+toc;
     y           = y';
     % Store derivative info at each time step
     yp_original = [yp_original;IDAGet('DerivSolution',t,1)'];
@@ -701,7 +721,7 @@ else
     end
 end
 Csout  = sum(cs_average);
-Sout   = 100*(1/param{i}.len_n*(param{i}.len_n/(param{i}.Nn))*Csout/param{i}.cs_max(3));
+Sout   = 100*(1/param{i}.len_n*(param{i}.len_n/(param{i}.Nn))*Csout/param{i}.cs_maxn);
 end
 
 

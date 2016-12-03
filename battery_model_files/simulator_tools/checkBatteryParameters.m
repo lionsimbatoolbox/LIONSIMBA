@@ -41,7 +41,6 @@ parameters_list {end+1} = 'sig_co';
 parameters_list {end+1} = 'eps_p';
 parameters_list {end+1} = 'eps_s';
 parameters_list {end+1} = 'eps_n';
-parameters_list {end+1} = 'eps_i';
 parameters_list {end+1} = 'eps_fi';
 parameters_list {end+1} = 'brugg_p';
 parameters_list {end+1} = 'brugg_s';
@@ -54,7 +53,9 @@ parameters_list {end+1} = 'k_p';
 parameters_list {end+1} = 'k_s';
 parameters_list {end+1} = 'k_n';
 parameters_list {end+1} = 'hcell';
-parameters_list {end+1} = 'cs_max';
+parameters_list {end+1} = 'cs_maxp';
+parameters_list {end+1} = 'cs_maxs';
+parameters_list {end+1} = 'cs_maxn';
 parameters_list {end+1} = 'Rp_p';
 parameters_list {end+1} = 'Rp_n';
 parameters_list {end+1} = 'sig';
@@ -104,7 +105,7 @@ parameters_list {end+1} = 'I1C';
 parameters_list {end+1} = 'w';
 parameters_list {end+1} = 'UseJacobian';
 parameters_list {end+1} = 'JacobianFunction';
-
+parameters_list {end+1} = 'daeFormulation';
 
 k = 1;
 

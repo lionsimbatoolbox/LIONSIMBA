@@ -10,7 +10,7 @@
 % ELECTROLYTEDIFFUSION evaluates the residual for the electrolyte
 % concentration of Li-ions in the electrolyte solution.
 
-function resCe = electrolyteDiffusion(t,ce,dCe,jflux,T,param)
+function [resCe, rhsCe] = electrolyteDiffusion(t,ce,dCe,jflux,T,param)
 
 % Diffusion coefficients
 % Comment this for benchmark purposes
@@ -19,9 +19,9 @@ Deff_s = param.ElectrolyteDiffusionFunction(ce(param.Np+1:param.Np+param.Ns),T(p
 Deff_n = param.ElectrolyteDiffusionFunction(ce(param.Np+param.Ns+1:end),T(param.Nal+param.Np+param.Ns+1:end-param.Nco),param,'n');
 
 % Uncomment this for benchmark purposes
-% Deff_p = repmat(param.Dp*param.eps_i(1)^param.brugg_p,param.Np,1);
-% Deff_s = repmat(param.Ds*param.eps_i(2)^param.brugg_s,param.Ns,1);
-% Deff_n = repmat(param.Dn*param.eps_i(3)^param.brugg_n,param.Nn,1);
+% Deff_p = repmat(param.Dp*param.eps_p^param.brugg_p,param.Np,1);
+% Deff_s = repmat(param.Ds*param.eps_s^param.brugg_s,param.Ns,1);
+% Deff_n = repmat(param.Dn*param.eps_n^param.brugg_n,param.Nn,1);
 
 % Interpolation of the diffusion coefficients
 [Deff_p, Deff_s, Deff_n] = interpolateDiffusionCoefficients(Deff_p,Deff_s,Deff_n,param);
@@ -74,7 +74,7 @@ last_p  = Deff_p(end-1)/(param.deltax_p*param.len_p);
 % Diffusion coefficient on the interface
 first_s = Deff_p(end)/den_s;
 % Fix the values at the boundaries
-A_tot(param.Np,param.Np-1:param.Np+1) = [last_p -(last_p+ first_s) first_s]/(param.deltax_p*param.len_p*param.eps_i(1));
+A_tot(param.Np,param.Np-1:param.Np+1) = [last_p -(last_p+ first_s) first_s]/(param.deltax_p*param.len_p*param.eps_p);
 
 %% Interface between separator and positive electrode (first volume in the separator)
 
@@ -85,7 +85,7 @@ second_s    = Deff_s(1)/(param.deltax_s*param.len_s);
 % Diffusion coefficient on the interface
 first_s     = Deff_p(end)/den_s;
 
-A_tot(param.Np+1,param.Np:param.Np+2) = [first_s -(first_s+second_s) second_s]/(param.deltax_s*param.len_s*param.eps_i(2));
+A_tot(param.Np+1,param.Np:param.Np+2) = [first_s -(first_s+second_s) second_s]/(param.deltax_s*param.len_s*param.eps_s);
 
 %% Interface between separator and negative electrode (last volume in the separator)
 
@@ -96,7 +96,7 @@ last_s  = Deff_s(end-1)/(param.deltax_s*param.len_s);
 % Diffusion coefficient on the interface
 first_n = Deff_s(end)/den_s;
 
-A_tot(param.Np+param.Ns,param.Np+param.Ns-1:param.Np+param.Ns+1) = [last_s -(last_s+first_n) first_n]/(param.deltax_s*param.len_s*param.eps_i(2));
+A_tot(param.Np+param.Ns,param.Np+param.Ns-1:param.Np+param.Ns+1) = [last_s -(last_s+first_n) first_n]/(param.deltax_s*param.len_s*param.eps_s);
 
 %% Interface between separator and negative electrode (first volume in the negative electrode)
 
@@ -107,7 +107,7 @@ second_n    = Deff_n(1)/(param.deltax_n*param.len_n);
 % Diffusion coefficient on the interface
 first_n     = Deff_s(end)/den_n;
 
-A_tot(param.Np+param.Ns+1,param.Np+param.Ns:param.Np+param.Ns+2) = [first_n -(first_n+second_n) second_n]/(param.deltax_n*param.len_n*param.eps_i(3));
+A_tot(param.Np+param.Ns+1,param.Np+param.Ns:param.Np+param.Ns+2) = [first_n -(first_n+second_n) second_n]/(param.deltax_n*param.len_n*param.eps_n);
 
 %% Usefull stuff
 a_tot       = [
@@ -123,17 +123,24 @@ jflux_tot   = [
     ];
 
 eps_tot     = [
-    repmat(param.eps_i(1),param.Np,1);...
-    repmat(param.eps_i(2),param.Ns,1);...
-    repmat(param.eps_i(3),param.Nn,1)
+    repmat(param.eps_p,param.Np,1);...
+    repmat(param.eps_s,param.Ns,1);...
+    repmat(param.eps_n,param.Nn,1)
     ];
 
-% Build porosities matrix
 K = 1./eps_tot;
 A_eps = diag(K);
-A_eps = A_eps + diag(K(1:end-1),1);
-A_eps = A_eps + diag(K(1:end-1),-1);
-A_eps = sparse(A_eps);
+
+% Build porosities matrix
+if(~isa(eps_tot,'casadi.MX') && ~isa(eps_tot,'casadi.SX'))
+    A_eps = A_eps + diag(K(1:end-1),1);
+    A_eps = A_eps + diag(K(1:end-1),-1);
+    A_eps = sparse(A_eps);
+else
+    A_u_l                   = diag(K(1:end-1));
+    A_eps(1:end-1,2:end)    = A_eps(1:end-1,2:end)+A_u_l;
+    A_eps(2:end,1:end-1)    = A_eps(2:end,1:end-1)+A_u_l;
+end
 
 A_eps(param.Np,param.Np-1:param.Np+1) = 1;
 A_eps(param.Np+1,param.Np:param.Np+2) = 1;
@@ -143,5 +150,9 @@ A_eps(param.Np+param.Ns+1,param.Np+param.Ns:param.Np+param.Ns+2) = 1;
 
 G = A_eps.*A_tot;
 
-resCe = dCe - (G*ce + K.*(1-param.tplus).*a_tot.*jflux_tot);
+% Write the RHS of the equation
+rhsCe = (G*ce + K.*(1-param.tplus).*a_tot.*jflux_tot);
+
+% Write the residual of the equation
+resCe = dCe - rhsCe;
 end
