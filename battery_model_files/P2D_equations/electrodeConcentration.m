@@ -23,8 +23,6 @@ if(param.SolidPhaseDiffusion==1 || param.SolidPhaseDiffusion==2)
     ddCs_n   = dCs(param.Np+1:end) - rhsCs_n;
 else
 	if(isfield(param,'symbolic_param_num') && (isa(param.Rp_p,'casadi.MX') || isa(param.Rp_p,'casadi.SX') || isa(param.Rp_n,'casadi.MX') || isa(param.Rp_n,'casadi.SX')))
-        % If the simulation is used for sensitivity purposes, the radius
-        % positions need to be evaluated at each time.
         param.Rad_position_p  = linspace(0,param.Rp_p,param.Nr_p);
         param.Rad_position_n  = linspace(0,param.Rp_n,param.Nr_n);
     end
