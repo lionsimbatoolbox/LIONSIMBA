@@ -67,7 +67,7 @@ catch
 end
 
 % Version of LIONSIMBA
-version       = '1.022';
+version       = '1.023';
 
 if(isempty(startParameters))
     % Load battery's parameters if not provided by the user
