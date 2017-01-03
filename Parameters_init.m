@@ -322,7 +322,7 @@ param.EnableAgeing = 0;
 
 % Initial SEI resistance value [Ohm m^2]
 param.R_SEI     = 0.01;
-%Molar weight                               [kg/mol] 
+%Molar weight                               [kg/mol]
 %ATTENTION: In Development of First Principles Capacity Fade Model
 %for Li-Ion Cells, Ramadass et al. the measurement unit of M_p is wrong as
 %well as the number itself. Please refer to Review of models for predicting
@@ -352,7 +352,7 @@ param.UseJacobian       = 1;
 param.JacobianFunction = [];
 
 
-% Type of the DAE system returned by LIONSIMBA
+% Type of the DAE system returned by LIONSIMBA batteryModel.m script. This function is under development.
 % Admitted values are:
 %                       1 - The equations are returned in an analytical
 %                       form, written as implicit DAEs, i.e.

@@ -1,5 +1,5 @@
 
-# LIONSIMBA - Lithium-ION SIMulation BAttery Toolbox 
+# LIONSIMBA - Lithium-ION SIMulation BAttery Toolbox
 
 <img style="float:right" height="330px" src="http://i68.tinypic.com/2nuhq9h.jpg" alt="Sublime's custom image"/>
 
@@ -16,7 +16,7 @@ Consumer electronics, wearable and personal health devices, power networks, micr
 ## Official Web Page
 
 Connect to the official web page to get the latest news
- 
+
 [http://sisdin.unipv.it/labsisdin/lionsimba.php](http://sisdin.unipv.it/labsisdin/lionsimba.php)
 -----------------------------------------------------------------
 ## Authors
@@ -50,9 +50,9 @@ If LIONSIMBA Toolbox is used for research purposes, the authors would like to ha
 -----------------------------------------------------------------
 
 ## Usage
- 
+
  Download the latest zip package of [LIONSIMBA](https://github.com/lionsimbatoolbox/LIONSIMBA/archive/master.zip) or clone the Git Repository using the following command
- 
+
  ```sh
 $ git clone https://github.com/lionsimbatoolbox/LIONSIMBA.git
 ```
@@ -63,6 +63,11 @@ Please feel free to use the 'issue' section on GitHub or write me at
 marcello (**dot**) torchio01 (**at**) ateneopv (**dot**) it
 
 ## Changelog
+
+### Last Update 01/03/2017 - V 1.023 Released
+
++ The code has been reorganized and some functions have been modularized for a better maintenance.
++ Added support in the user's guide for the installation and configuration of the SUNDIALS Matlab interface.
 
 ### Last Update 09/23/2016 - V 1.022 Released
 
