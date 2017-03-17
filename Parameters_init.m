@@ -11,7 +11,9 @@
 % environment. Modify the values here in in order to parametrize the cell
 % variables or change simulator parameters.
 
-function param= Parameters_init
+function param = Parameters_init
+
+
 
 %% Constants
 % Faraday Constant  [C/mol]
@@ -19,7 +21,7 @@ param.F         = 96487;
 % Gas constant      [J / (mol K)]
 param.R         = 8.314;
 
-%% Lengths          [m]
+%% Sections thickness    [m]
 % Aluminium current collector
 param.len_al= 10e-6;
 % Positive Electrode
@@ -306,7 +308,7 @@ param.ReactionRatesFunction                 = @reactionRates;
 param.SOC_estimation_function = @socEstimator;
 
 %% Potentiostatic section
-% This value (if set) is used to control the battery in a potentiostatic
+% This value (if set together with the AppliedCurrent flag to 3) is used to control the battery in a potentiostatic
 % fashion.
 param.V_reference = 4;
 
