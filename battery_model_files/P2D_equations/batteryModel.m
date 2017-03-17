@@ -176,14 +176,24 @@ for i=1:n_cells
         rhsQ    = zeros(length(dQ),1);
     end
     
-    % Ageing effects take place only during charging processes
-    if(param.EnableAgeing==1 && param.I >0)
+    % Ageing effects take place only during charging processes (as assumed here).
+    % It is necessary to switch between the case in which the applied current density is a numerical
+    % quantity and in the case in which is a symbolical quantity.
+    if(isa(param.I,'casadi.SX') && param.EnableAgeing==1)
         % Film thickness
+        [resDfilm, rhsDfilm] = SEI_layer(dFilm, J_S, param);
+        
+        % Use the if_else CasADi sentence to determine a switching behavior of the film thickness dynamics according to the sign of the applied current density.
+        resDfilm = if_else(param.I>=0,resDfilm,zeros(size(resDfilm,1),1));
+        rhsDfilm = if_else(param.I>=0,rhsDfilm,zeros(size(rhsDfilm,1),1));
+    elseif(param.EnableAgeing==1 && param.I >=0)
+		% If the applied current is a numerical quantity, then perform the regular computations
         [resDfilm, rhsDfilm] = SEI_layer(dFilm, J_S, param);
     else
         resDfilm    = dFilm;
         rhsDfilm    = zeros(length(resDfilm),1);
     end
+    
     % Check if the temperature dynamics are enabled.
     if(param.TemperatureEnabled==1)
         % Evaluate the residuals for the temperature

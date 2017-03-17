@@ -37,7 +37,16 @@ in          = 2*k_nT.*sqrt(ce(param.Np+param.Ns+1:end)).*sqrt(cs_star(param.Np+1
 jnn_calc    = in.* sinh(deltan);
 
 J_s = zeros(param.Nn,1);
-if(param.EnableAgeing == 1 && param.I > 0)
+
+% Switch the cases in which the appplied current density is a symbolical variable
+if(isa(param.I,'casadi.SX') && param.EnableAgeing == 1)
+	eta_s = Phis(param.Np+1:end) - Phie(param.Np+param.Ns+1:end) - param.Uref_s - param.F*solverFlux(param.Np+1:end).*(param.R_SEI+film./(param.k_n_aging));
+    % Tafel equation for the side reaction flux. 
+    alpha   = 0.5*param.F./(param.R*T(param.Nal+param.Np+param.Ns+1:end-param.Nco));
+    
+    % By means of the if_else statement of CasADi, it is possible to represent dynamics that switch according to the value of the sumbolical quantity param.I
+    J_s = if_else(param.I>=0,-param.i_0_jside.*(param.I/param.I1C)^param.w.*(exp(-alpha.*eta_s))./param.F,zeros(param.Nn,1));
+elseif(param.EnableAgeing == 1 && param.I > 0)
     eta_s = Phis(param.Np+1:end) - Phie(param.Np+param.Ns+1:end) - param.Uref_s - param.F*solverFlux(param.Np+1:end).*(param.R_SEI+film./(param.k_n_aging));
     % Tafel equation for the side reaction flux. 
     alpha   = 0.5*param.F./(param.R*T(param.Nal+param.Np+param.Ns+1:end-param.Nco));

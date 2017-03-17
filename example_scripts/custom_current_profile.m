@@ -12,7 +12,7 @@
 % profile charge/discharge
 
 % Clear the workspace
-clear all
+clear
 close all
 
 %% Parameters
@@ -128,7 +128,7 @@ title('Cell Input Current')
 figure(5)
 plot(time,[out.cs_average{1}(:,[1 param{1}.Np*multp]);out2.cs_average{1}(:,[1 param{1}.Np*multp]);out3.cs_average{1}(:,[1 param{1}.Np*multp]);out4.cs_average{1}(:,[1 param{1}.Np*multp])],'LineWidth',6)
 hold on
-line([time(1) time(end)],[param{1}.cs_max(1) param{1}.cs_max(1)],'LineWidth',6,'LineStyle','--')
+line([time(1) time(end)],[param{1}.cs_maxp param{1}.cs_maxp],'LineWidth',6,'LineStyle','--')
 xlabel('Time [s]')
 ylabel('Positive electrode average concentration [mol/m^3]')
 grid on
@@ -138,7 +138,7 @@ legend('c^* x=0','c^* x=l_p','c^* max')
 figure(6)
 plot(time,[out.cs_average{1}(:,[(param{1}.Np+1)*multn (param{1}.Np+param{1}.Nn)*multn]);out2.cs_average{1}(:,[param{1}.Np+1 param{1}.Np+param{1}.Nn]*multn);out3.cs_average{1}(:,[param{1}.Np+1 param{1}.Np+param{1}.Nn]*multn);out4.cs_average{1}(:,[param{1}.Np+1 param{1}.Np+param{1}.Nn]*multn)],'LineWidth',6)
 hold on
-line([time(1) time(end)],[param{1}.cs_max(3) param{1}.cs_max(3)],'LineWidth',6,'LineStyle','--')
+line([time(1) time(end)],[param{1}.cs_maxn param{1}.cs_maxn],'LineWidth',6,'LineStyle','--')
 xlabel('Time [s]')
 ylabel('Negative electrode average concentration [mol/m^3]')
 grid on
