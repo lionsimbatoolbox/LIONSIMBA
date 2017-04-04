@@ -13,6 +13,7 @@ Consumer electronics, wearable and personal health devices, power networks, micr
 <br>
 <br>
 <br>
+
 ## Official Web Page
 
 Connect to the official web page to get the latest news
@@ -63,6 +64,10 @@ Please feel free to use the 'issue' section on GitHub or write me at
 marcello (**dot**) torchio01 (**at**) ateneopv (**dot**) it
 
 ## Changelog
+
+### Last Update 04/04/2017
+
++ Minor fixes and bug corrections (thanks to Jeesoon Choi for pointing the bugs out)
 
 ### Last Update 01/03/2017 - V 1.023 Released
 
