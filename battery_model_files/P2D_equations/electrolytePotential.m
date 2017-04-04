@@ -66,7 +66,6 @@ A_tot(1,1:2) = [Keff_p_medio(1) -Keff_p_medio(1)]./(param.deltax_p*param.len_p);
 % The value of Phie in the last volume of the negative electrode is known
 % and fixed.
 A_tot(end,end-1:end) = [0 1];
-
 %% Interfaces Positive electrode (last volume of the positive)
 
 % Here we are in the last volume of the positive
@@ -89,10 +88,8 @@ A_tot(param.Np+param.Ns,param.Np+param.Ns-1:param.Np+param.Ns+1) = [-last_s (las
 %% Interfaces Positive electrode (first volume of the negative)
 % Here we are inside the first volume of the negative electrode
 den_ns = (param.deltax_n*param.len_n/2+param.deltax_s*param.len_s/2);
-first_n = Keff_n_medio(2)/(param.deltax_n*param.len_n);
+first_n = Keff_n_medio(1)/(param.deltax_n*param.len_n);
 A_tot(param.Np+param.Ns+1,param.Np+param.Ns:param.Np+param.Ns+2) = [-Keff_s_medio(end)/den_ns (first_n+Keff_s_medio(end)/den_sn) -first_n];
-% Fix this value otherwise it will be not correct
-A_tot(param.Np+param.Ns+2,param.Np+param.Ns+1) = -Keff_n_medio(1)/(param.deltax_n*param.len_n);
 
 %% Electrolyte concentration interpolation
 % Evaluate the interpolation of the electrolyte concentration values at the
