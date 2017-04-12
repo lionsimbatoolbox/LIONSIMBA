@@ -208,8 +208,8 @@ for i=1:n_cells
     
     if((Y0_existence==0) && (YP0_existence==0))
         % Solve the algebraic equations to find a set of semi-consistent initial
-        % conditions for the algebraic equations. This will help the DAE solver as
-        % a warm startup.
+        % conditions for the algebraic equations. This will help the DAE solver to find a set of consisten initial conditions. 
+        % Note that the initial guess for the algebraic variables is defined in the file algebraicInitialConditions.m
         [init_point,~,~,~,~] = fsolve(@algebraicStates,x0_alg,opt_fsolve,ce_init,cs_average_init,Q_init,T_init,film_init,param{i});
         
         % Build the initial values array for the integrator

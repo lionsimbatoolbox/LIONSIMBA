@@ -19,9 +19,9 @@ Keff_n = param.ElectrolyteConductivityFunction(ce(param.Np+param.Ns+1:end),T(par
 
 % Evaluate the derivatives used in Qohm calculations
 [dPhis, dPhie, dCe] = ThermalDerivatives(Phis',Phie',ce',param);
-dPhis = dPhis';
-dPhie = dPhie';
-dCe = dCe';
+dPhis 	= dPhis';
+dPhie 	= dPhie';
+dCe 	= dCe';
 [Up,dudt_p,Un,dudt_n] = param.OpenCircuitPotentialFunction(cs_star,T,param);
 
 %% Reversible heat generation rate

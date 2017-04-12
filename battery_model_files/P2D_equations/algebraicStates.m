@@ -7,7 +7,8 @@
 %					Bhushan Gopaluni, University of British Columbia
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ALGEBRAICSTATES evaluates the residuals of algebraic equations.
+% ALGEBRAICSTATES evaluates the residuals of the algebraic equations of the 
+% space-discretized version of the P2D model
 
 function [res,Up,Un,dudt_p,dudt_n,Keff,J_S] = algebraicStates(x,ce,cs_barrato,Q,T,film,param,t)
 

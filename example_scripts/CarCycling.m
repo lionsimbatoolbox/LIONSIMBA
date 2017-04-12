@@ -13,7 +13,7 @@
 % one cell and its behavior is plotted after the simulation ends.
 
 % Clear the workspace
-clear all
+clear
 
 % Define the parameters structure.
 param{1} = Parameters_init;
@@ -31,9 +31,9 @@ param{1}.Nn    = 30;
 param{1}.Nco   = 10;
 
 % Define the applied current densities.
-input_currents = [-29.5;14.75;-14.75;-29.5;-58;-29.5;14.75];
+input_currents 	= [-29.5;14.75;-14.75;-29.5;-58;-29.5;14.75];
 % Define the duration of each applied current step.
-timings = [50,10,150,200,5,200,10];
+timings 		= [50,10,150,200,5,200,10];
 % Note that length(timings)==length(input_currents) !!
 
 % Initialize the states and their time derivatives

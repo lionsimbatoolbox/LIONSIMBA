@@ -12,7 +12,7 @@
 % paper.
 
 % Clear the workspace
-clear all
+clear
 
 % Define the integration times.
 t0 = 0;
@@ -26,12 +26,12 @@ param{1}.hcell = 0.01;
 
 % Start the simulation. Note that the final integration time is 10^4 and
 % LIONSAMBA will stop automatically when reached the Cutoff Voltage of
-% 2.5V.
+% 2.5V. Note that no Jacobian among one simulation and the other. This is
+% due to the fact that the model structure changes for each of the
+% simulation (because hcell changes) and consequently also the Jacobian
+% matrix changes and cannot be used for all the scenarios.
 
 out1 = startSimulation(t0,tf,[],-30,param);
-
-% Store the Jacobian matrix
-param{1}.JacobianFunction = out1.JacobianFun;
 
 % Change the hcell parameter and set it to 1 [W / (m^2 K)]
 param{1}.hcell = 1;

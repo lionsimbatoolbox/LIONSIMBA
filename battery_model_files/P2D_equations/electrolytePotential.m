@@ -13,8 +13,7 @@
 function [res_Phie,Keff] = electrolytePotential(jflux,ce,T,param,Phie)
 
 %% Effective electrolyte conductivity
-% Keff = param.ElectrolyteConductivityFunction(ce,T,param);
-% keyboard
+
 % Comment this for benchmark purposes
 Keff_p = param.ElectrolyteConductivityFunction(ce(1:param.Np),T(param.Nal+1:param.Nal+param.Np),param,'p');
 Keff_s = param.ElectrolyteConductivityFunction(ce(param.Np+1:param.Np+param.Ns),T(param.Nal+param.Np+1:param.Nal+param.Np+param.Ns),param,'s');
@@ -27,7 +26,11 @@ Keff_n = param.ElectrolyteConductivityFunction(ce(param.Np+param.Ns+1:end),T(par
 
         
 Keff = [Keff_p;Keff_s;Keff_n];
+
+% Since the values of Keff are evaluated at the center of each CV, there is the need to interpolate these quantities
+% and find their values at the edges of the CVs
 [Keff_p_medio, Keff_s_medio, Keff_n_medio] = interpolateElectrolyteConductivities(Keff_p,Keff_s,Keff_n,param);
+
 %% Matrix building
 
 % i-th element
@@ -75,7 +78,7 @@ A_tot(param.Np,param.Np-1:param.Np+1) = [-last_p (last_p+Keff_p_medio(end)/den_s
 %% Interfaces Positive electrode (first volume of the separator)
 
 % Here we are in the first volume of the separator
-den_sp = (param.deltax_p*param.len_p/2+param.deltax_s*param.len_s/2);
+den_sp 	= (param.deltax_p*param.len_p/2+param.deltax_s*param.len_s/2);
 first_s = Keff_s_medio(1)/(param.deltax_s*param.len_s);
 A_tot(param.Np+1,param.Np:param.Np+2) = [-Keff_p_medio(end)/den_sp (first_s+Keff_p_medio(end)/den_sp) -first_s];
 
@@ -87,7 +90,7 @@ A_tot(param.Np+param.Ns,param.Np+param.Ns-1:param.Np+param.Ns+1) = [-last_s (las
 
 %% Interfaces Positive electrode (first volume of the negative)
 % Here we are inside the first volume of the negative electrode
-den_ns = (param.deltax_n*param.len_n/2+param.deltax_s*param.len_s/2);
+den_ns 	= (param.deltax_n*param.len_n/2+param.deltax_s*param.len_s/2);
 first_n = Keff_n_medio(1)/(param.deltax_n*param.len_n);
 A_tot(param.Np+param.Ns+1,param.Np+param.Ns:param.Np+param.Ns+2) = [-Keff_s_medio(end)/den_ns (first_n+Keff_s_medio(end)/den_sn) -first_n];
 
@@ -119,22 +122,20 @@ else
     prod_tot = diff([prod_p;prod_s;prod_n]);
 end
 prod_tot = [prod_p(1);prod_tot];
+
 flux_p = param.deltax_p*param.len_p*param.F*param.a_i(1)*jflux(1:param.Np);
-
 flux_s = param.deltax_s*param.len_s*param.F*param.a_i(2);
-
 flux_n = param.deltax_n*param.len_n*param.F*param.a_i(3)*jflux(param.Np+1:end-1);
 
 flux_tot = [flux_p;flux_s*ones(param.Ns,1);flux_n];
 
 f = flux_tot-K*prod_tot;
-% Set the last element of Phie to 0
-% f(end+1) = 0;
+% Set the last element of Phie to 0 (enforcing BC)
 f=[f;0];
 
 if(~isa(prod_p,'casadi.SX') && ~isa(prod_p,'casadi.MX'))
     A_tot = sparse(A_tot);
 end
-
+% Return the residual value for the electrolyte potential
 res_Phie = A_tot*Phie-f;
 end

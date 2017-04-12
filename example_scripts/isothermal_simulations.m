@@ -29,7 +29,9 @@ param{1}.TemperatureEnabled = 0;
 
 out1 = startSimulation(t0,tf,[],-15,param);
 
-% Store the Jacobian matrix
+% Store the Jacobian matrix for future computations. This is possible
+% because the different scenarios share the same model structure, and the
+% only quantity which differs is the applied current density.
 param{1}.JacobianFunction = out1.JacobianFun;
 
 % Run the simulation

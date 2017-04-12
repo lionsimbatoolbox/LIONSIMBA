@@ -22,19 +22,22 @@ if(param.SolidPhaseDiffusion==1 || param.SolidPhaseDiffusion==2)
     rhsCs_n  = ((-3/param.Rp_n)*jflux(param.Np+1:end));
     ddCs_n   = dCs(param.Np+1:end) - rhsCs_n;
 else
+	% This check is performed to ensure a correct sizing of the indices used in the computation of
+	% the analytical version of the Jacobian matrix.
 	if(isfield(param,'symbolic_param_num') && (isa(param.Rp_p,'casadi.MX') || isa(param.Rp_p,'casadi.SX') || isa(param.Rp_n,'casadi.MX') || isa(param.Rp_n,'casadi.SX')))
         param.Rad_position_p  = linspace(0,param.Rp_p,param.Nr_p);
         param.Rad_position_n  = linspace(0,param.Rp_n,param.Nr_n);
     end
     % If the regular diffusion equation is selected, then use FDM to
     % evaluate the complete solution.
+    
     % First, retreive the diffusion coefficients
     [Dps_eff, Dns_eff] = param.SolidDiffusionCoefficientsFunction(T,param);
     % Initialize the variables
     rhsCs_p = [];
     rhsCs_n = [];
-    ddCs_p = [];
-    ddCs_n = [];
+    ddCs_p 	= [];
+    ddCs_n 	= [];
     start_cs = 1;
     % For every single CV in the cathode, let assume the presence of a
     % solid particle
@@ -42,12 +45,11 @@ else
         cs_solid    = cs_barrato((i-1)*param.Nr_p+start_cs:i*param.Nr_p);
         cst_solid   = dCs((i-1)*param.Nr_p+start_cs:i*param.Nr_p);
         % Evaluate first order derivatives
-        %         cs_barratox_p                   = deriveFirst(0,param.Rp_p,param.Nr_p,cs_solid)';
         cs_barratox_p                   = param.FO_D_p*cs_solid*param.FO_D_c_p;
         % Impose the BCs
-        % r=Rp_p
+        % r = Rp_p
         cs_barratox_p(param.Nr_p)       = -jflux(i)/Dps_eff(i);
-        % r=0 using l'Hopitàl rule
+        % r = 0 using l'Hopitàl rule
         cs_barratox_p(1)                = 0;
         % Second order derivatives
         cs_barratoxx_p                  = param.SO_D_p*cs_solid*param.SO_D_c_p;
@@ -69,12 +71,11 @@ else
         cs_solid    = cs_barrato((i-1)*param.Nr_n+start_cs:i*param.Nr_n+start_cs-1);
         cst_solid   = dCs((i-1)*param.Nr_n+start_cs:i*param.Nr_n+start_cs-1);
         % Evaluate first order derivatives
-        %         cs_barratox_n                   = deriveFirst(0,param.Rp_n,param.Nr_n,cs_solid)';
         cs_barratox_n                   = param.FO_D_n*cs_solid*param.FO_D_c_n;
         % Impose the BCs
-        % r=Rp_p
+        % r = Rp_p
         cs_barratox_n(param.Nr_n)       = -jflux(param.Np+i)/Dns_eff(i);
-        % r=0 using l'Hopitàl rule
+        % r = 0 using l'Hopitàl rule
         cs_barratox_n(1)                = 0;
         % According to the numerical scheme for the second order derivative, add the term to enforce Neumann BCs. Note that another
         % Neumann BC should be imposed at cs_barratoxx_p but given that at that point the derivative is zero, its contribution here

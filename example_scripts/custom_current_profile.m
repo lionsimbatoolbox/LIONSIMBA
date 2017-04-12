@@ -31,8 +31,8 @@ param{1}.Np            = 10;
 param{1}.Ns            = 10;
 param{1}.Nn            = 10;
 
-param{1}.hcell = 1;
-param{1}.Tref = 298.15;
+param{1}.hcell         = 1;
+param{1}.Tref          = 298.15;
 
 param{1}.AbsTol        = 1e-6;
 param{1}.RelTol        = 1e-6;
@@ -55,7 +55,9 @@ C_rate = 1.5;
 % Discharge the battery to the 20% of SOC
 out = startSimulation(t0,tf,initialState,-25,param);
 
-% Store the Jacobian matrix
+% Store the Jacobian matrix for future computations. This is possible
+% because the different scenarios share the same model structure, and the
+% only quantity which differs is the applied current density.
 param{1}.JacobianFunction = out.JacobianFun;
 
 % Update the initial states
