@@ -3,7 +3,7 @@
 % Please send comments or questions to
 % marcello.torchio01@ateneopv.it
 %
-% Copyright 2015: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
+% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
 %					Bhushan Gopaluni, University of British Columbia
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -284,7 +284,7 @@ param.extraData = [];
 % Define the name of the external function that has to be called to compute
 % the value of applied current. This function is called during the
 % integration process.
-param.CurrentFunction = @getInputCurrent;
+param.CurrentFunction = [];
 
 % Define the name of the external function used to compute physical and
 % transport properties of the materials during simulation. Please refer to

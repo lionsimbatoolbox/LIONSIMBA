@@ -3,7 +3,7 @@
 % Please send comments or questions to
 % marcello.torchio01@ateneopv.it
 %
-% Copyright 2015: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
+% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
 %					Bhushan Gopaluni, University of British Columbia
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -49,7 +49,7 @@ else
         % Impose the BCs
         % r = Rp_p
         cs_barratox_p(param.Nr_p)       = -jflux(i)/Dps_eff(i);
-        % r = 0 using l'Hopitàl rule
+        % r = 0 using l'Hopitï¿½l rule
         cs_barratox_p(1)                = 0;
         % Second order derivatives
         cs_barratoxx_p                  = param.SO_D_p*cs_solid*param.SO_D_c_p;
@@ -75,7 +75,7 @@ else
         % Impose the BCs
         % r = Rp_p
         cs_barratox_n(param.Nr_n)       = -jflux(param.Np+i)/Dns_eff(i);
-        % r = 0 using l'Hopitàl rule
+        % r = 0 using l'Hopitï¿½l rule
         cs_barratox_n(1)                = 0;
         % According to the numerical scheme for the second order derivative, add the term to enforce Neumann BCs. Note that another
         % Neumann BC should be imposed at cs_barratoxx_p but given that at that point the derivative is zero, its contribution here

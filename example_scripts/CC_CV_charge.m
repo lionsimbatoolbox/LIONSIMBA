@@ -3,7 +3,7 @@
 % Please send comments or questions to
 % marcello.torchio01@ateneopv.it
 %
-% Copyright 2015: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
+% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
 %					Bhushan Gopaluni, University of British Columbia
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,7 +52,7 @@ end
 % Define 1C rate of current
 I1C = 29.5;
 
-% Allow up to 2C rate in the CC stage
+% Run with a 1.5C-rate in the CC stage
 C_rate = 1.5;
 %% Discharge section
 % Discharge the battery to the 20% of SOC

@@ -3,7 +3,7 @@
 % Please send comments or questions to
 % marcello.torchio01@ateneopv.it
 %
-% Copyright 2015: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
+% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
 %					Bhushan Gopaluni, University of British Columbia
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,7 +124,7 @@ switch(param{1}.AppliedCurrent)
     case 2
         param{1}.getCurr = param{1}.CurrentFunction;
     otherwise
-        param{1}.getCurr = @(t,t0,tf,extra)I;
+        param{1}.getCurr = @(t,t0,tf,x,param,extra)I;
 end
 
 % Define absolute and relative tolerances. If more cells are required,
@@ -184,7 +184,7 @@ for i=1:n_cells
     
     % Preallocate the differentiation matrices used for the solid phase
     % potential. This can be done here because such matrices are considered
-    % to be time invariant. 
+    % to be time invariant.
     param{i} = solidPhaseDifferentiationMatrices(param{i});
     
     % Preallocate the differentiation matrices used for the solid phase
@@ -192,7 +192,7 @@ for i=1:n_cells
     param{i} = solidPhaseDiffusionDifferentiationMatrices(param{i});
     
     % Initialize the value of the injected current density.
-    param{i}.I = param{1}.getCurr(0,t0,tf,param{1}.extraData);
+    param{i}.I = param{1}.getCurr(0,t0,tf,Y0,param{1},param{1}.extraData);
     
     %% Initial conditions
     
@@ -208,7 +208,7 @@ for i=1:n_cells
     
     if((Y0_existence==0) && (YP0_existence==0))
         % Solve the algebraic equations to find a set of semi-consistent initial
-        % conditions for the algebraic equations. This will help the DAE solver to find a set of consisten initial conditions. 
+        % conditions for the algebraic equations. This will help the DAE solver to find a set of consisten initial conditions.
         % Note that the initial guess for the algebraic variables is defined in the file algebraicInitialConditions.m
         [init_point,~,~,~,~] = fsolve(@algebraicStates,x0_alg,opt_fsolve,ce_init,cs_average_init,Q_init,T_init,film_init,param{i});
         
@@ -272,7 +272,7 @@ dati.param  = param;
 dati.t0     = t0;
 dati.tf     = tf;
 
-% Define algebraic and differential variables. 
+% Define algebraic and differential variables.
 % 1-> differential variables,
 % 0-> algebraic variables.
 id = [];
@@ -295,7 +295,7 @@ if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
     xsym    = SX.sym('x',[sum(n_diff)+sum(n_alg),1]);
     xpsym   = SX.sym('xp',[sum(n_diff)+sum(n_alg),1]);
     cj      = SX.sym('cj',1);
-
+    
     % Get the model equations written in an implicit form in a symbolic way.
     [dx_tot, ~, ~] = batteryModel(0,xsym,xpsym,dati);
     
@@ -314,11 +314,11 @@ if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
     
     % Define the options for Sundials
     options = IDASetOptions('RelTol'        , opt.RelTol,...
-                            'AbsTol'        , opt.AbsTol,...
-                            'MaxNumSteps'   , 1500,...
-                            'VariableTypes' , id,...
-                            'UserData'      , dati,...
-                            'JacobianFn'    , @djacfn);
+        'AbsTol'        , opt.AbsTol,...
+        'MaxNumSteps'   , 1500,...
+        'VariableTypes' , id,...
+        'UserData'      , dati,...
+        'JacobianFn'    , @djacfn);
     
 elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
     % If the Jacobian wants to be used and also it has been provided in the
@@ -334,24 +334,32 @@ elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
     
     % Define the options for Sundials
     options = IDASetOptions('RelTol'        , opt.RelTol,...
-                            'AbsTol'        , opt.AbsTol,...
-                            'MaxNumSteps'   , 1500,...
-                            'VariableTypes' , id,...
-                            'UserData'      , dati,...
-                            'JacobianFn'    , @djacfn);
+        'AbsTol'        , opt.AbsTol,...
+        'MaxNumSteps'   , 1500,...
+        'VariableTypes' , id,...
+        'UserData'      , dati,...
+        'JacobianFn'    , @djacfn);
 else
     % In this case the user does not want to make use of the Jacobian
     % matrix. A numerical approximation will be calculated instead.
     
     % Define the options for Sundials
     options = IDASetOptions('RelTol'        , opt.RelTol,...
-                            'AbsTol'        , opt.AbsTol,...
-                            'MaxNumSteps'   , 1500,...
-                            'VariableTypes' , id,...
-                            'UserData'      , dati);
+        'AbsTol'        , opt.AbsTol,...
+        'MaxNumSteps'   , 1500,...
+        'VariableTypes' , id,...
+        'UserData'      , dati);
 end
 
-
+% Enable the capability to deal with piecewise inputs only when custom
+% current profiles are used
+if(param{1}.AppliedCurrent == 2)
+    % Add to IDA options structure the pointer to the function used to
+    % identify the presence of events (in this particular case
+    % discontinuities in the applied input currents)
+    options.RootsFn     = @inputCurrentDiscontinuity;
+    options.NumRoots    = 1;
+end
 
 % Init the solver
 IDAInit(@batteryModel,t0,Y0,YP0,options);
@@ -365,6 +373,9 @@ t = t0;
 
 % Store in the results the initial states values.
 y = yy';
+
+% Store the total number of complete set of states
+y_tot = y;
 
 [ce_t,cs_bar_t,T_t,jflux_t,Phis_t, Phie_t, cs_star_t, SOC_t, film_t, js_t,Up_t,Un_t,R_int_t,app_current_t,Voltage_t,SOC_estimated_t,Qrev_t,Qrxn_t,Qohm_t,Q_t,~,dudtp_t, dudtn_t,t_tot] =...
     storeSimulationResults(n_cells,ce_t,cs_bar_t,T_t,jflux_t,Phis_t, Phie_t, cs_star_t, SOC_t, film_t, js_t,app_current_t,Voltage_t,SOC_estimated_t,Up_t,Un_t,R_int_t,Qrev_t,Qrxn_t,Qohm_t,Q_t,dudtp_t, dudtn_t, t_tot, y, t,SOC_estimate,t0,tf, param);
@@ -405,11 +416,36 @@ while(t<tf)
     % The solver IDA is used to solve the resulting set of DAEs. Please
     % refer to IDA manual for more information about syntax and its usage.
     tic
-    [~, t, y]   = IDASolve(tf,'OneStep');
+    [status, t, y]   = IDASolve(tf,'OneStep');
+    
+    
+    % If status > 0 it means that roots have been found during the
+    % resolution of the equations
+    if(status>0)
+        % In case of custom current profiles, the roots are determined by
+        % the presence of a discontinuity in the applied current density
+        if(param{1}.AppliedCurrent==2)
+            % Define a new time instant at which re-initialize the solver
+            % using the last known values of the states
+            t = t*(1+1e-5);
+            IDAReInit(t,y,0*y,options);
+            
+            % Find consistent initial conditions starting from the new
+            % point and keep on integrating
+            [~, y, yp] = IDACalcIC(t+10,'FindAlgebraic');
+        else
+            error(e.message);
+        end
+    end
     sim_time    = sim_time+toc;
     y           = y';
-    % Store derivative info at each time step
-    yp_original = [yp_original;IDAGet('DerivSolution',t,1)'];
+    y_tot       = [y_tot;y];
+    if(status==0)
+        % Store derivative info at each time step
+        yp_original = [yp_original;IDAGet('DerivSolution',t,1)'];
+    else
+        yp_original = [yp_original;yp'];
+    end
     
     [ce_t,cs_bar_t,T_t,jflux_t,Phis_t, Phie_t, cs_star_t, SOC_t, film_t, js_t,Up_t,Un_t,R_int_t,app_current_t,Voltage_t,SOC_estimated_t,Qrev_t,Qrxn_t,Qohm_t,Q_t,tot_voltage,dudtp_t, dudtn_t,t_tot] =...
         storeSimulationResults(n_cells,ce_t,cs_bar_t,T_t,jflux_t,Phis_t, Phie_t, cs_star_t, SOC_t, film_t, js_t,app_current_t,Voltage_t,SOC_estimated_t,Up_t,Un_t,R_int_t,Qrev_t,Qrxn_t,Qohm_t,Q_t,dudtp_t, dudtn_t, t_tot, y, t,SOC_estimate,t0,tf, param);
@@ -430,7 +466,7 @@ while(t<tf)
             if(param{1}.AppliedCurrent==3)
                 fprintf(['Applied current \t\t',num2str(y(end)),' A/m^2\n']);
             else
-                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,param{1}.extraData)),' A/m^2\n']);
+                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,y,param{1},param{1}.extraData)),' A/m^2\n']);
             end
             fprintf(['Voltage \t\t\t\t',          num2str(Phis_t{1}(end,1)-Phis_t{1}(end,end)),   ' V\n']);
             fprintf(['Temperature \t\t\t',        num2str(temperature),                           ' K\n']);
@@ -452,7 +488,7 @@ while(t<tf)
             if(param{1}.AppliedCurrent==3)
                 fprintf(['Applied current \t\t',num2str(y(end)),' A/m^2\n']);
             else
-                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,param{1}.extraData)),' A/m^2\n']);
+                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,y,param{1},param{1}.extraData)),' A/m^2\n']);
             end
             
             fprintf(['Voltage \t\t\t\t',          num2str(tot_voltage),       ' V\n']);
@@ -491,7 +527,7 @@ if(time_vector(end)>t0)
     % Retreive derivative information at the last time step
     yp          = interp1(t_tot{i},yp_original,time_vector(end))';
     % After interpolating, delete all the other data.
-    yp_original = yp_original(end,:)';
+    %     yp_original = yp_original(end,:)';
 else
     % If the integration step carried out by SUNDIALS is less than the
     % parametrized step size, then return the initial data as set of
@@ -656,11 +692,11 @@ end
 results.Y                           = y;
 results.YP                          = yp;
 
-results.original.Y                  = y_original;
+results.original.Y                  = y_tot;
 results.original.YP                 = yp_original;
 
 results.original.initialState.Y     = y_original;
-results.original.initialState.YP    = yp_original;
+results.original.initialState.YP    = yp_original(end,:);
 
 results.initialState.Y              = y;
 results.initialState.YP             = yp;
@@ -679,8 +715,23 @@ if(param{1}.AppliedCurrent==1)
     results.original.appliedCurrent = param{1}.I * ones(size(t_tot_original{1},1),1);
     % Variable current profile
 elseif(param{1}.AppliedCurrent==2)
-    results.appliedCurrent          = param{1}.getCurr(t_tot{1},t0,tf,param{1}.extraData);
-    results.original.appliedCurrent = param{1}.getCurr(t_tot_original{1},t0,tf,param{1}.extraData);
+    %(t,t0,tf,y,param{1},param{1}.extraData)
+    try
+        results.appliedCurrent          = param{1}.getCurr(t_tot{1},t0,tf,param{1}.extraData);
+        results.original.appliedCurrent = param{1}.getCurr(t_tot_original{1},t0,tf,param{1}.extraData);
+    catch
+        
+        for i=1:size(y_tot,1)
+            results.original.appliedCurrent(i)          = param{1}.getCurr(t_tot_original{1}(i),t0,tf,y_tot(i,:),param{1},param{1}.extraData);
+        end
+        
+        y_tot = interp1(t_tot_original{1},y_tot,time_vector');
+        
+        for i=1:size(y_tot,1)
+            results.appliedCurrent(i)          = param{1}.getCurr(time_vector(i),t0,tf,y_tot(i,:),param{1},param{1}.extraData);
+        end
+        
+    end
 else
     % Potentiostatic
     results.appliedCurrent          = app_current_t{1};

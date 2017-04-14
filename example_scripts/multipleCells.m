@@ -3,12 +3,12 @@
 % Please send comments or questions to
 % marcello.torchio01@ateneopv.it
 %
-% Copyright 2015: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
+% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
 %					Bhushan Gopaluni, University of British Columbia
 %                 	Richard D. Braatz, MIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % LIONSAMBA example script
-% Multiple cess scenario: simulates three cells in serial connection.
+% Multiple cells scenario: simulates three cells in serial connection.
 
 % Clear the workspace
 clear
