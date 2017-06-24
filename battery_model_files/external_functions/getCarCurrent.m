@@ -12,7 +12,7 @@
 % have to be defined to run properly with LIONSIMBA. This script returns the value of the input current as a function of
 % the time, states and parameters
 
-function I = getCarCurrent(t,t0,tf,y,param,extra)
+function I = getCarCurrent(t,t0,tf,x,param,extra)
 if(t>=0 && t<=50)
     I = -29.5;
 elseif(t>50 && t<=60)

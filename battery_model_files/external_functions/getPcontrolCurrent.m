@@ -16,17 +16,25 @@
 %               - t         : value of the current time step
 %               - t0        : initial integration time
 %               - tf        : final integration time
-%               - y         : contains the array of all the states
+%               - x         : contains the array of all the states
 %                             (differential and algebraic) at time t
 %               - param     : contains the parameters structure
 %               - extra     : extra parameters
 %       Outputs:
 %               - I     : Applied current desnity [A/m^2]
 
-function I = getPcontrolCurrent(t,t0,tf,y,param,extra)
+function I = getPcontrolCurrent(t,t0,tf,x,param,extra)
 
-% Get the value of the Voltage out of the current battery states
-V = y(param.Phis_indices(1))-y(param.Phis_indices(end));
+% Get the value of the Voltage out of the current battery states.
+V = x(param{1}.Phis_indices(1))-x(param{1}.Phis_indices(end));
+
+% Please note the usage of fields like param{1}.Phis_indices etc. These are
+% arrays evaluated during the call to startSimulation and they store the
+% relative position of the variables inside the overall array x. The script
+% computeVariablesIndices.m in the simulator tools folder explains how such
+% indices are evaluated, and the name of the associated variables. The
+% example getPcontrolCurrentPack.m explains how to deal when multiple
+% cells are present.
 
 % Define the proportional action. Do not put extreme values, the simulator
 % could crash

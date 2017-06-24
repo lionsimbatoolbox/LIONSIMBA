@@ -59,11 +59,24 @@ $ git clone https://github.com/lionsimbatoolbox/LIONSIMBA.git
 ```
 ## Bugs report
 
-Please feel free to use the 'issue' section on GitHub or write me at
+Please feel free to use the 'issue' section on GitHub or write to
+
+davide (**dot**) raimondo (**at**) unipv (**dot**) it
+
+or
 
 marcello (**dot**) torchio01 (**at**) ateneopv (**dot**) it
 
+
 ## Changelog
+
+### Last Update 06/24/2017 - V 1.024 Released
+
++ Feedback-based custom current profile
++ New examples
++ Handling of input current discontinuities
++ Minor changes
+
 
 ### Last Update 04/04/2017
 

@@ -37,7 +37,7 @@ for i=1:n_cells
     % all crossed by the same current. Novertheless, each cell can be
     % driven with its own current. This is useful for ABMS development
     % where charge balancing is required.
-    param.I     = param_tot{1}.getCurr(t,t0,tf,x,param,param_tot{i}.extraData);
+    param.I     = param_tot{1}.getCurr(t,t0,tf,x_tot,param_tot,param_tot{i}.extraData);
     % Retreive differential variables
     % Electrolyte concentration
     ce          = x(param.ce_indices);

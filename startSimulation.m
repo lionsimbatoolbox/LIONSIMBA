@@ -67,7 +67,7 @@ catch
 end
 
 % Version of LIONSIMBA
-version       = '1.023';
+version       = '1.024';
 
 if(isempty(startParameters))
     % Load battery's parameters if not provided by the user
@@ -191,8 +191,6 @@ for i=1:n_cells
     % diffusion in case of Fick's law.
     param{i} = solidPhaseDiffusionDifferentiationMatrices(param{i});
     
-    % Initialize the value of the injected current density.
-    param{i}.I = param{1}.getCurr(0,t0,tf,Y0,param{1},param{1}.extraData);
     
     %% Initial conditions
     
@@ -206,6 +204,24 @@ for i=1:n_cells
     param{i}.ndiff = n_diff(i);
     param{i}.nalg  = n_alg(i);
     
+    % The x_index variable will be used in the battery model file
+    % for indexing purposes.
+    param{i}.x_index    = (start_x_index:n_diff(i)+n_alg(i)+start_x_index-1);
+    
+    param{i}.xp_index   = (start_xp_index:n_diff(i)+start_xp_index-1);
+    
+    % Update the starting x_index value for the (possible) next cell
+    start_x_index       = n_diff(i)+n_alg(i)+start_x_index;
+    
+    start_xp_index      = n_diff(i)+n_alg(i)+start_xp_index;
+end
+
+
+for i=1:n_cells
+    % Initialize the value of the injected current density.
+    param{i}.I = param{1}.getCurr(0,t0,tf,Y0,param,param{1}.extraData);
+    
+    
     if((Y0_existence==0) && (YP0_existence==0))
         % Solve the algebraic equations to find a set of semi-consistent initial
         % conditions for the algebraic equations. This will help the DAE solver to find a set of consisten initial conditions.
@@ -217,16 +233,6 @@ for i=1:n_cells
         Y0  = [Y0;Yt0];
         YP0 = [YP0;zeros(size(Yt0))];
     end
-    % The x_index variable will be used in the battery model file
-    % for indexing purposes.
-    param{i}.x_index    = (start_x_index:n_diff(i)+n_alg(i)+start_x_index-1);
-    
-    param{i}.xp_index   = (start_xp_index:n_diff(i)+start_xp_index-1);
-    
-    % Update the starting x_index value for the (possible) next cell
-    start_x_index       = n_diff(i)+n_alg(i)+start_x_index;
-    
-    start_xp_index      = n_diff(i)+n_alg(i)+start_xp_index;
 end
 
 if(n_cells==1)
@@ -308,8 +314,7 @@ if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
     JacFun = Function('fJ',{xsym,cj},{J});
     
     % Store the function into a structure such that IDA will use it for the
-    % evaluation of the Jacobian matrix (see the definition of the function
-    % djacfn at the end of this file).
+    % evaluation of the Jacobian matrix (see jacobianFunction.m in simulator_tools).
     dati.fJ = JacFun;
     
     % Define the options for Sundials
@@ -318,7 +323,7 @@ if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
         'MaxNumSteps'   , 1500,...
         'VariableTypes' , id,...
         'UserData'      , dati,...
-        'JacobianFn'    , @djacfn);
+        'JacobianFn'    , @jacobianFunction);
     
 elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
     % If the Jacobian wants to be used and also it has been provided in the
@@ -338,7 +343,7 @@ elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
         'MaxNumSteps'   , 1500,...
         'VariableTypes' , id,...
         'UserData'      , dati,...
-        'JacobianFn'    , @djacfn);
+        'JacobianFn'    , @jacobianFunction);
 else
     % In this case the user does not want to make use of the Jacobian
     % matrix. A numerical approximation will be calculated instead.
@@ -357,7 +362,7 @@ if(param{1}.AppliedCurrent == 2)
     % Add to IDA options structure the pointer to the function used to
     % identify the presence of events (in this particular case
     % discontinuities in the applied input currents)
-    options.RootsFn     = @inputCurrentDiscontinuity;
+    options.RootsFn     = @rootFinder;
     options.NumRoots    = 1;
 end
 
@@ -383,32 +388,10 @@ y_tot = y;
 sim_time = 0;
 % Loop until the integration time reaches tf.
 while(t<tf)
-    %% Check stop conditions for each cell
-    for i=1:n_cells
-        voltage = Phis_t{i}(end,1)-Phis_t{i}(end,end);
-        Sout    = internalSOCestimate(cs_bar_t,param,i);
-        % Break conditions.
-        if(voltage<param{i}.CutoffVoltage)
-            disp(['Cell #',num2str(i),' below its Cutoff voltage. Stopping']);
-            exit_reason = 1;
-        end
-        
-        if(voltage>param{i}.CutoverVoltage)
-            disp(['Cell #',num2str(i),' above its Cutover voltage. Stopping']);
-            exit_reason = 2;
-        end
-        
-        if(Sout<param{i}.CutoffSOC)
-            disp(['Cell #',num2str(i),' below its Cutoff SOC. Stopping']);
-            exit_reason = 3;
-        end
-        
-        if(Sout>param{i}.CutoverSOC)
-            disp(['Cell #',num2str(i),' above its Cutover SOC. Stopping']);
-            exit_reason = 4;
-        end
-    end
     
+    % Check if simulation stop conditions are met or not
+    exit_reason = checkSimulationStopConditions(n_cells, Phis_t, cs_bar_t, param);
+    % If a stop condition is reached, stop the simulation
     if(exit_reason~=0)
         break;
     end
@@ -417,7 +400,6 @@ while(t<tf)
     % refer to IDA manual for more information about syntax and its usage.
     tic
     [status, t, y]   = IDASolve(tf,'OneStep');
-    
     
     % If status > 0 it means that roots have been found during the
     % resolution of the equations
@@ -439,6 +421,8 @@ while(t<tf)
     end
     sim_time    = sim_time+toc;
     y           = y';
+    % Store the matrix containing all the states at all the integration
+    % time steps.
     y_tot       = [y_tot;y];
     if(status==0)
         % Store derivative info at each time step
@@ -466,7 +450,7 @@ while(t<tf)
             if(param{1}.AppliedCurrent==3)
                 fprintf(['Applied current \t\t',num2str(y(end)),' A/m^2\n']);
             else
-                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,y,param{1},param{1}.extraData)),' A/m^2\n']);
+                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,y,param,param{1}.extraData)),' A/m^2\n']);
             end
             fprintf(['Voltage \t\t\t\t',          num2str(Phis_t{1}(end,1)-Phis_t{1}(end,end)),   ' V\n']);
             fprintf(['Temperature \t\t\t',        num2str(temperature),                           ' K\n']);
@@ -488,7 +472,7 @@ while(t<tf)
             if(param{1}.AppliedCurrent==3)
                 fprintf(['Applied current \t\t',num2str(y(end)),' A/m^2\n']);
             else
-                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,y,param{1},param{1}.extraData)),' A/m^2\n']);
+                fprintf(['Applied current \t\t',num2str(param{1}.getCurr(t,t0,tf,y,param,param{1}.extraData)),' A/m^2\n']);
             end
             
             fprintf(['Voltage \t\t\t\t',          num2str(tot_voltage),       ' V\n']);
@@ -505,7 +489,6 @@ disp(['Elasped time: ',num2str(sim_time),' s']);
 
 % Interpolate for fixed time step values
 t_tot_original = t_tot;
-
 
 % Build the time vector used for interpolation
 time_vector = (t0:param{i}.integrationStep:tf);
@@ -526,8 +509,6 @@ end
 if(time_vector(end)>t0)
     % Retreive derivative information at the last time step
     yp          = interp1(t_tot{i},yp_original,time_vector(end))';
-    % After interpolating, delete all the other data.
-    %     yp_original = yp_original(end,:)';
 else
     % If the integration step carried out by SUNDIALS is less than the
     % parametrized step size, then return the initial data as set of
@@ -715,22 +696,14 @@ if(param{1}.AppliedCurrent==1)
     results.original.appliedCurrent = param{1}.I * ones(size(t_tot_original{1},1),1);
     % Variable current profile
 elseif(param{1}.AppliedCurrent==2)
-    %(t,t0,tf,y,param{1},param{1}.extraData)
-    try
-        results.appliedCurrent          = param{1}.getCurr(t_tot{1},t0,tf,param{1}.extraData);
-        results.original.appliedCurrent = param{1}.getCurr(t_tot_original{1},t0,tf,param{1}.extraData);
-    catch
-        
-        for i=1:size(y_tot,1)
-            results.original.appliedCurrent(i)          = param{1}.getCurr(t_tot_original{1}(i),t0,tf,y_tot(i,:),param{1},param{1}.extraData);
-        end
-        
-        y_tot = interp1(t_tot_original{1},y_tot,time_vector');
-        
-        for i=1:size(y_tot,1)
-            results.appliedCurrent(i)          = param{1}.getCurr(time_vector(i),t0,tf,y_tot(i,:),param{1},param{1}.extraData);
-        end
-        
+    for i=1:size(y_tot,1)
+        results.original.appliedCurrent(i)          = param{1}.getCurr(t_tot_original{1}(i),t0,tf,y_tot(i,:),param,param{1}.extraData);
+    end
+    
+    y_tot = interp1(t_tot_original{1},y_tot,time_vector');
+    
+    for i=1:size(y_tot,1)
+        results.appliedCurrent(i)          = param{1}.getCurr(time_vector(i),t0,tf,y_tot(i,:),param,param{1}.extraData);
     end
 else
     % Potentiostatic
@@ -750,43 +723,4 @@ states.ionic_flux   = jflux_t(end,:);
 states.Temperature  = T_t(end,:);
 % Call the estimation procedure
 estimate = param.SOC_estimation_function(t,t0,tf,states,param.extraData,param);
-end
-
-
-% This function is used to get a measurement of the SOC according to the
-% internal states. This function assumes that all the states are
-% measurable.
-function Sout = internalSOCestimate(cs_average_t,param,i)
-% Check if Fick's law of diffusion is used. This is required to define the
-% correct way how to evaluate the SOC.
-if(param{i}.SolidPhaseDiffusion~=3)
-    cs_average = cs_average_t{i}(end,param{i}.Np+1:end);
-else
-    start_index = param{i}.Nr_p*param{i}.Np+1;
-    end_index   = start_index+param{i}.Nr_n-1;
-    cs_average  = zeros(param{i}.Nn,1);
-    for n=1:param{i}.Nn
-        cs_average(n)   = 1/param{i}.Rp_n*(param{i}.Rp_n/param{i}.Nr_n)*sum(cs_average_t{i}(end,start_index:end_index));
-        start_index     = end_index + 1;
-        end_index       = end_index + param{i}.Nr_n;
-    end
-end
-Csout  = sum(cs_average);
-Sout   = 100*(1/param{i}.len_n*(param{i}.len_n/(param{i}.Nn))*Csout/param{i}.cs_maxn);
-end
-
-
-% This function is used to evaluate the Jacobian Matrix of the P2D model.
-function [J, flag, new_data] = djacfn(t, y, yp, rr, cj, data)
-
-% Extract the function object
-fJ          = data.fJ;
-
-% Evaluate the Jacobian with respect to the current values of the states
-% and their time derivatives.
-J           = full(fJ(y,cj));
-
-% Return the values
-flag        = 0;
-new_data    = [];
 end

@@ -30,7 +30,7 @@ for i=1:n_cells
     Un_t{i}             = [Un_t{i};U_n'];
     % Get the OCV
     OCV                 = U_p(1)-U_n(end);
-    R_int               = abs((voltage-OCV)/param{1}.getCurr(t,t0,tf,y,param{1},param{1}.extraData));
+    R_int               = abs((voltage-OCV)/param{1}.getCurr(t,t0,tf,y,param,param{1}.extraData));
     R_int_t{i}          = [R_int_t{i};R_int];
     % Heat generation rates
     [Qrev, Qrxn, Qohm]  = heatGenerationRates(Phis_t{i}(end,:),Phie_t{i}(end,:),jflux_t{i}(end,:),T_t{i}(end,:),cs_star_t{i}(end,:),ce_t{i}(end,:),param{i});
