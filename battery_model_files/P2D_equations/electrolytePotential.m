@@ -1,30 +1,39 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
-%
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ELECTROLYTEPOTENTIAL evaluates the residuals for the electrolyte
-% potential.
-
 function [res_Phie,Keff] = electrolytePotential(jflux,ce,T,param,Phie)
+% electrolytePotential evaluates residuals for the electrolyte potential equation discretised spatially (method of lines).
+
+%   This file is part of the LIONSIMBA Toolbox
+%
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
 %% Effective electrolyte conductivity
 
 % Comment this for benchmark purposes
 Keff_p = param.ElectrolyteConductivityFunction(ce(1:param.Np),T(param.Nal+1:param.Nal+param.Np),param,'p');
 Keff_s = param.ElectrolyteConductivityFunction(ce(param.Np+1:param.Np+param.Ns),T(param.Nal+param.Np+1:param.Nal+param.Np+param.Ns),param,'s');
-Keff_n = param.ElectrolyteConductivityFunction(ce(param.Np+param.Ns+1:end),T(param.Nal+param.Np+param.Ns+1:end-param.Nco),param,'n');
+Keff_n = param.ElectrolyteConductivityFunction(ce(param.Np+param.Ns+1:end),T(param.Nal+param.Np+param.Ns+1:end-param.Ncu),param,'n');
 
 % Uncomment this for benchmark purposes
 % Keff_p = param.eps_p^param.brugg_p *(4.1253*1e-2 + 5.007*1e-4*ce(1:param.Np) - 4.7212*1e-7*ce(1:param.Np).^2 +1.5094*1e-10*ce(1:param.Np).^3 -1.6018*1e-14*ce(1:param.Np).^4);
 % Keff_s = param.eps_s^param.brugg_s *(4.1253*1e-2 + 5.007*1e-4*ce(param.Np+1:param.Np+param.Ns) - 4.7212*1e-7*ce(param.Np+1:param.Np+param.Ns).^2 +1.5094*1e-10*ce(param.Np+1:param.Np+param.Ns).^3 -1.6018*1e-14*ce(param.Np+1:param.Np+param.Ns).^4);
 % Keff_n = param.eps_n^param.brugg_n *(4.1253*1e-2 + 5.007*1e-4*ce(param.Np+param.Ns+1:end) - 4.7212*1e-7*ce(param.Np+param.Ns+1:end).^2 +1.5094*1e-10*ce(param.Np+param.Ns+1:end).^3 -1.6018*1e-14*ce(param.Np+param.Ns+1:end).^4);
 
-        
 Keff = [Keff_p;Keff_s;Keff_n];
 
 % Since the values of Keff are evaluated at the center of each CV, there is the need to interpolate these quantities
@@ -64,11 +73,23 @@ A_p = A_p./(param.deltax_p*param.len_p);
 A_tot = blkdiag(A_p,A_s,A_n);
 
 % Fix values to enforce BC on the left side of the positive electrode.
-A_tot(1,1:2) = [Keff_p_medio(1) -Keff_p_medio(1)]./(param.deltax_p*param.len_p);
+% A_tot(1,1:2) = [Keff_p_medio(1) -Keff_p_medio(1)]./(param.deltax_p*param.len_p);
 
 % The value of Phie in the last volume of the negative electrode is known
 % and fixed.
-A_tot(end,end-1:end) = [0 1];
+% right now, we have -k_eff (last interior face) + keff (last interior
+% face)
+% Leave uncommented only one of the two lines below in order to enforce the phi_e boundary conditions at the end of the negative electrode
+
+switch param.edge_values
+	case 2
+		% Indirect way of setting phi_e at neg electrode = 0. (linear interpolation)
+		A_tot(end,end-1:end) = [-1/3 1];  
+	otherwise
+		% Direct way of setting phi_e at neg electrode = 0 (the entire CV is set to 0)
+		A_tot(end,end-1:end) = [0 1]; 
+end
+
 %% Interfaces Positive electrode (last volume of the positive)
 
 % Here we are in the last volume of the positive
@@ -130,12 +151,14 @@ flux_n = param.deltax_n*param.len_n*param.F*param.a_i(3)*jflux(param.Np+1:end-1)
 flux_tot = [flux_p;flux_s*ones(param.Ns,1);flux_n];
 
 f = flux_tot-K*prod_tot;
+
 % Set the last element of Phie to 0 (enforcing BC)
 f=[f;0];
 
 if(~isa(prod_p,'casadi.SX') && ~isa(prod_p,'casadi.MX'))
     A_tot = sparse(A_tot);
 end
+
 % Return the residual value for the electrolyte potential
 res_Phie = A_tot*Phie-f;
 end

@@ -5,13 +5,6 @@
 
  A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
 
-Consumer electronics, wearable and personal health devices, power networks, microgrids, and hybrid electric vehicles (HEVs) are some of the many applications of lithium-ion batteries. Their optimal design and management are important for safe and profitable operations. The use of accurate mathematical models can help in achieving the best performance. This page provides a parametrizable Matlab framework for battery design, simulation, and control of Li-ion cells or battery packs. Based on the well known, theory-based pseudo-two-dimensional (P2D) model, the framework has been coded by reformulating the set of PDEs describing the cell behavior into a set of DAEs. The time domain is left continuous, while the spatial domain is discretized according to the Finite Volume Method (FVM). The time-adaptive DAE solver IDA is used to solve the resulting set of DAEs.
-
-
-
-
-<br>
-<br>
 <br>
 
 ## Official Web Page
@@ -27,6 +20,14 @@ Connect to the official web page to get the latest news
 + [Bhushan R. Gopaluni](http://www.chbe.ubc.ca/profile/bhushan-gopaluni/)
 + [Richard D.Braatz](http://web.mit.edu/cheme/people/profile.html?id=48)
 + [Davide M. Raimondo](http://sisdin.unipv.it/labsisdin/raimondo/raimondo.php)
+
+## Main code contributors for LIONSIMBA 2.0
++ [Ian Campbell](http://www.imperial.ac.uk/electrochem-sci-eng/people/)
++ [Krishnakumar Gopalakrishnan](https://www.edx.org/bio/krishnakumar-gopalakrishnan)
+
+## Acknowledgments
+
++ **Andrea Pozzi** for his extensive support for LIONSIMBA 2.0 beta testing and continous support
 
 -----------------------------------------------------------------
 ## Citations
@@ -47,13 +48,22 @@ If LIONSIMBA Toolbox is used for research purposes, the authors would like to ha
 ##### **Download here the [BibTeX](http://sisdin.unipv.it/labsisdin/mtorchio/lionsimba.bib) file**
 
 ##### **Read the Journal paper** [here](http://jes.ecsdl.org/content/163/7/A1192.abstract)
+-----------------------------------------------------------------
+## Errata corrige
+This section collects typos present in the literature-related paper.
+
 
 -----------------------------------------------------------------
 
-## Usage
+## How to start using LIONSIMBA
 
- Download the latest zip package of [LIONSIMBA](https://github.com/lionsimbatoolbox/LIONSIMBA/archive/master.zip) or clone the Git Repository using the following command
+You can get LIONSIMBA in two ways:
 
+### 1 - Download the latest version in zip format
+
+ Download the latest zip package from [HERE](https://github.com/lionsimbatoolbox/LIONSIMBA/archive/master.zip) 
+
+### 2 - Clone the repository
  ```sh
 $ git clone https://github.com/lionsimbatoolbox/LIONSIMBA.git
 ```
@@ -63,12 +73,30 @@ Please feel free to use the 'issue' section on GitHub or write to
 
 davide (**dot**) raimondo (**at**) unipv (**dot**) it
 
-or
+## Forks
+Feel free to fork the project and modify at your best convenienve. The framework is continously under development, and contributions through push requests are welcome.
 
-marcello (**dot**) torchio01 (**at**) ateneopv (**dot**) it
-
+-----------------------------------------------------------------
 
 ## Changelog
+
+### Last Update 03/11/2018 - V 2.0 Released
+**Major changes**
++ Constant and variable profile power input mode added
++ Analytical initialisation of the model equations
++ Added thermal lumped model
++ Added stoichiometry indices for SOC calculation
++ Added possibility to initialize cell SOC through Parameters_init call
++ Added solid phase diffusion scheme based on spectral methods (the scheme provides the correct results, but is not yet 100% completed)
+
+
+**Minor changes**
++ General code review, polishing and variable renaming
++ Added possibility to chose the interpolation scheme at the control volumes edges
++ Normalized the finite-difference numerical scheme for the solid phase diffusion (it reduces numerical inaccuracies)
+
+**Known bugs/issues**
++ Thermal diffusivities are different when considering thermal enabled or isothermal scenario.
 
 ### Last Update 06/24/2017 - V 1.024 Released
 

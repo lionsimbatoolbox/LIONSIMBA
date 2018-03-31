@@ -1,15 +1,27 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
-%
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% LIONSAMBA example script
+% LIONSIMBA example script
 % CC_CV_charge scenario: this script provides an example to run a
-% constant current-constant voltage charge of the cell.
+% constant current-constant voltage charge of a cell.
+
+%   This file is part of the LIONSIMBA Toolbox
+%
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
 % Clear the workspace
 clear
@@ -27,9 +39,9 @@ initialState.YP = [];
 % Define the parameters structure.
 param{1}               = Parameters_init;
 
-param{1}.Np            = 30;
-param{1}.Ns            = 30;
-param{1}.Nn            = 30;
+param{1}.Np            = 10;
+param{1}.Ns            = 10;
+param{1}.Nn            = 10;
 
 param{1}.hcell         = 1;
 param{1}.Tref          = 298.15;
@@ -50,7 +62,7 @@ else
 end
 
 % Define 1C rate of current
-I1C = 29.5;
+I1C = 29.23;
 
 % Run with a 1.5C-rate in the CC stage
 C_rate = 1.5;
@@ -89,7 +101,7 @@ param2 = param;
 param2{1}.JacobianFunction = [];
 
 % Potentiostatic operations
-param2{1}.AppliedCurrent = 3;
+param2{1}.OperatingMode = 3;
 % Change the cutover voltage to avoid simulation interruptions
 param2{1}.CutoverVoltage = 4.3;
 % Potentiostatic reference
@@ -131,7 +143,7 @@ box on
 title('Cell Temperature')
 
 figure(4)
-plot(time,[out.appliedCurrent;out2.appliedCurrent;out3.appliedCurrent;out4.appliedCurrent],'LineWidth',6)
+plot(time,[out.curr_density;out2.curr_density;out3.curr_density;out4.curr_density],'LineWidth',6)
 hold on
 xlabel('Time [s]')
 ylabel('Applied Current [A/m^2]')

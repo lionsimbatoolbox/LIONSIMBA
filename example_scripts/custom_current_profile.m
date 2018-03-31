@@ -1,6 +1,6 @@
-% LIONSAMBA example script
-% Continuous custom current profile: this script shows how to run a continuous custom current
-% profile charge/discharge.
+% LIONSIMBA example script
+% Custom current profile: this script shows how to run a custom current
+% profile charge/discharge
 
 %   This file is part of the LIONSIMBA Toolbox
 %
@@ -87,10 +87,6 @@ initialState = out2.initialState;
 % Apply a custom current profile
 param{1}.OperatingMode = 4;
 
-% Define which external function is going to be used from the simulato to
-% gather the value of the applied current density at each time step
-param{1}.CurrentDensityFunction = @getInputCurrent;
-
 % Run the simulation
 out3 = startSimulation(0,5000,initialState,0,param);
 
@@ -98,7 +94,7 @@ out3 = startSimulation(0,5000,initialState,0,param);
 initialState = out3.initialState;
 
 % Go back to galvanostatic operating conditions
-param{1}.OperatingMode= 1;
+param{1}.OperatingMode = 1;
 
 % Run the simulation
 out4 = startSimulation(0,5000,initialState,0,param);

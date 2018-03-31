@@ -1,7 +1,15 @@
-function Sout = internalSOCestimate(cs_average_t,param,i)
-%   internalSOCestimate is used to get a measurement of the SOC according to the
-%   internal states. This function assumes that all the states are
-%   measurable.
+function P_density = getInputPowerDensity(t,t0,tf,x,param,extra)
+%	getInputPowerDensity returns the value of the input current density as a function of time.
+%
+%       P = getInputPowerDensity(t,t0,tf,extra)
+%
+%       Inputs:
+%               - t     : value of the current time step
+%               - t0    : initial integration time
+%               - tf    : final integration time
+%               - extra : extra parameters
+%       Outputs:
+%               - P_density     : Applied power density [W/m^2]
 
 %   This file is part of the LIONSIMBA Toolbox
 %
@@ -24,20 +32,16 @@ function Sout = internalSOCestimate(cs_average_t,param,i)
 %   LIONSIMBA is a free Matlab-based software distributed with an MIT
 %   license.
 
-% Check if Fick's law of diffusion is used. This is required to define the
-% correct way how to evaluate the SOC.
-if(param{i}.SolidPhaseDiffusion~=3)
-    cs_average = cs_average_t{i}(end,param{i}.Np+1:end);
-else
-    start_index = param{i}.Nr_p*param{i}.Np+1;
-    end_index   = start_index+param{i}.Nr_n-1;
-    cs_average  = zeros(param{i}.Nn,1);
-    for n=1:param{i}.Nn
-        cs_average(n)   = 1/param{i}.Rp_n*(param{i}.Rp_n/param{i}.Nr_n)*sum(cs_average_t{i}(end,start_index:end_index));
-        start_index     = end_index + 1;
-        end_index       = end_index + param{i}.Nr_n;
-    end
+% Define your own linear/nonlinear function of time for the applied power density
+
+% P = (t-t0)/(tf-t0) *(-30) + 0;
+% P_density = -90*sin(t+100/100);
+
+% P_density = -10*sin(omega*t+phi);
+frequency = 0.1;
+P_density = -300*sin((2*pi*frequency)*t+(1/100));
+if P_density == 0
+    P_density = 1e-2;
 end
-Csout  = sum(cs_average);
-Sout   = 100*((1/param{i}.len_n*(param{i}.len_n/(param{i}.Nn))*Csout/param{i}.cs_maxn)-param{i}.theta_min_neg)/(param{i}.theta_max_neg-param{i}.theta_min_neg);
+    
 end

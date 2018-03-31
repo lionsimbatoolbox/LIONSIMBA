@@ -1,6 +1,6 @@
 % LIONSIMBA example script
-% Different C rates: this script provides the example simulation shown in the
-% paper.
+% solidPhaseDiffusionSchemes: this script presents a comparison of the simulation results between
+% a spectral scheme and a finite difference method when used for the resolution of the solid phase diffusion equations
 
 %   This file is part of the LIONSIMBA Toolbox
 %
@@ -32,39 +32,44 @@ tf = 10^4;
 % Define the parameters structure.
 param{1} = Parameters_init;
 
-% Start the simulation. Note that the final integration time is 10^4 and
-% LIONSIMBA will stop automatically when reached the Cutoff Voltage of
-% 2.5V.
+% Use Fick's law of diffusion for solid particles
+param{1}.SolidPhaseDiffusion=3;
+
+% Use Finite Difference scheme for the resolution of the solid diffusion equation
+param{1}.SolidPhaseDiffusionNumericalScheme =1;
 
 out1 = startSimulation(t0,tf,[],-15,param);
 
-% Store the Jacobian matrix
-param{1}.JacobianFunction=out1.JacobianFun;
+% Use Spectral scheme for the resolution of the solid diffusion equation
+param{1}.SolidPhaseDiffusionNumericalScheme =2;
 
-% Run the simulation
-out2 = startSimulation(t0,tf,[],-30,param);
-
-% Run the simulation
-out3 = startSimulation(t0,tf,[],-60,param);
+out2 = startSimulation(t0,tf,[],-15,param);
 
 %% Plot the results
 
 figure(1)
-plot(out1.time{1},out1.Temperature{1}(:,end),'LineWidth',6)
+plot(out1.time{1},out1.Voltage{1},'LineWidth',3)
 hold on
-plot(out2.time{1},out2.Temperature{1}(:,end),'--','LineWidth',6)
-plot(out3.time{1},out3.Temperature{1}(:,end),'-.','LineWidth',6)
-xlabel('Time [s]')
-ylabel('Temperature [K]')
-grid on
-box on
-
-figure(2)
-plot(out1.time{1},out1.Voltage{1},'LineWidth',6)
-hold on
-plot(out2.time{1},out2.Voltage{1},'--','LineWidth',6)
-plot(out3.time{1},out3.Voltage{1},'-.','LineWidth',6)
+plot(out2.time{1},out2.Voltage{1},'--','LineWidth',3)
 xlabel('Time [s]')
 ylabel('Voltage [V]')
+legend('FDM','SM')
 grid on
-box on
+
+figure(2)
+plot(out1.time{1},out1.Temperature{1},'LineWidth',3)
+hold on
+plot(out2.time{1},out2.Temperature{1},'--','LineWidth',3)
+xlabel('Time [s]')
+ylabel('Temperature [K]')
+legend('FDM','SM')
+grid on
+
+figure(3)
+plot(out1.time{1},out1.cs_surface{1}(:,[1,10,15,20]),'LineWidth',3)
+hold on
+plot(out2.time{1},out2.cs_surface{1}(:,[1,10,15,20]),'--','LineWidth',3)
+xlabel('Time [s]')
+ylabel('Solid phase concentration [mol/m^3]')
+legend('FDM','SM')
+grid on

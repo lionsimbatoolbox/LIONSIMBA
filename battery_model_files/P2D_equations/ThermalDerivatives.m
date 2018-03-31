@@ -1,25 +1,33 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
+function [dPhis, dPhie, dCe] = ThermalDerivatives(Phis,Phie,ce,param)
+% ThermalDerivatives evaluates the set of spatial derivatives used in thermal dynamics.
+% This function evaluates the spatial derivatives (gradients) of the relevant variables for
+% thermal (heat generation) calculations. Note that the spatial derivatives are evaluated within,
+% and not at the edges of control volumes.
+
+%   This file is part of the LIONSIMBA Toolbox
 %
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% THERMALDERIVATIVES evaluetes the set of derivatives used in the evaluation of the
-% thermal dynamics
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
-function [dPhis, dPhie, dCe, ie, is, die, dis] = ThermalDerivatives(Phis,Phie,ce,param)
-% This script evaluates the derivatives of the dependent variables for
-% thermal calculations. Note that the derivatives are evaluated within the
-% control volume and not at the boundaries.
-
-%% Solid potential derivatives
-
-% For each of the proposed numerical approximations, the evaluation of the derivative is carried out with a forward
-% and backward differentiation scheme for the first and last volume of the entire mesh. For the mid points, a central
-% differentiation scheme is adopted.
+% For each of the numerical derivatives computed below, the first and last control volumes are evaluated with first
+% order accuracy (forward and backward difference schemes respectively),
+% while the middle control volume approximations use a second order accuracy (central difference scheme).
 
 %% Solid potential derivatives
 
@@ -58,10 +66,10 @@ dPhie_last_p = 2*(Phie(param.Np+1)-Phie(param.Np-1))/(3 * param.deltax_p*param.l
 % positive section for the calculation of the derivative. Therefore suitable
 % considerations must be done with respect to the deltax quantities.
 
-% First CV in the separator: derivative approximation with a central scheme
+% First CV in the separator: derivative approximation with a central difference scheme
 dPhie_first_s = 2*(Phie(param.Np+2)-Phie(param.Np))/(param.deltax_p*param.len_p + 3* param.deltax_s*param.len_s);
 
-% Central differentiation scheme
+% Central difference scheme
 dPhies =  (Phie(param.Np+3:param.Np+param.Ns)-Phie(param.Np+1:param.Np+param.Ns-2))/(2*param.deltax_s*param.len_s);
 
 % Attention! The last volume of the separator will involve one volume of the
@@ -80,9 +88,9 @@ dPhie_last_s = 2*(Phie(param.Np+param.Ns+1)-Phie(param.Np+param.Ns-1))/( param.d
 % First CV in the negative electrode: derivative approximation with a central scheme
 dPhie_first_n = 2*(Phie(param.Np+param.Ns+2)-Phie(param.Np+param.Ns))/(3 * param.deltax_n*param.len_n + param.deltax_s*param.len_s);
 
-% Central differentiation scheme
+% Central difference scheme
 dPhien = [(Phie(param.Np+param.Ns+3:end)-Phie(param.Np+param.Ns+1:end-2))/(2*param.deltax_p*param.len_p);...
-            (3*Phie(end)-4*Phie(end-1)+Phie(end-2))/(2*param.deltax_n*param.len_n)
+    (3*Phie(end)-4*Phie(end-1)+Phie(end-2))/(2*param.deltax_n*param.len_n)
     ];
 
 dPhie = [dPhiep;dPhie_last_p;dPhie_first_s;dPhies;dPhie_last_s;dPhie_first_n;dPhien];
@@ -127,42 +135,13 @@ dCe_last_s = 2*(ce(param.Np+param.Ns+1)-ce(param.Np+param.Ns-1))/( param.deltax_
 % separator section for the calculation of the derivative. Therefore suitable
 % considerations must be done with respect to the deltax quantities.
 
-% First CV in the negative electroce: derivative approximation with a central scheme
+% First CV in the negative electrode: derivative approximation with a central scheme
 dCe_first_n = 2*(ce(param.Np+param.Ns+2)-ce(param.Np+param.Ns))/(3 * param.deltax_n*param.len_n + param.deltax_s*param.len_s);
 
 dCen = [(ce(param.Np+param.Ns+3:end)-ce(param.Np+param.Ns+1:end-2))/(2*param.deltax_p*param.len_p);... 	% Central differentiation scheme
-            (3*ce(end)-4*ce(end-1)+ce(end-2))/(2*param.deltax_n*param.len_n) 							% Backward differentiation scheme
+    (3*ce(end)-4*ce(end-1)+ce(end-2))/(2*param.deltax_n*param.len_n) 							% Backward differentiation scheme
     ];
 
 dCe = [dCep;dCe_last_p;dCe_first_s;dCes;dCe_last_s;dCe_first_n;dCen];
-
-
-%% Solid and electrolitic currents (not used in the remainder of the code)
-
-iep = dPhis(1:param.Np)*param.sig_eff(1)+param.I;
-isp = param.I-iep;
-ien = dPhis(param.Np+1:end)*param.sig_eff(3)+param.I;
-isn = param.I-ien;
-
-diep = [(-3*iep(1)+4*iep(2)-iep(3))/(2*param.len_p*param.deltax_p);... 		% Forward differentiation scheme
-    (iep(3:end)-iep(1:end-2))/(2*param.len_p*param.deltax_p);... 			% Central differentiation scheme
-    (3*iep(end)-4*iep(end-1)+iep(end-2))/(2*param.len_p*param.deltax_p)];	% Backward differentiation scheme
-
-disp = [(-3*isp(1)+4*isp(2)-isp(3))/(2*param.len_p*param.deltax_p);...		% Forward differentiation scheme
-    (isp(3:end)-isp(1:end-2))/(2*param.len_p*param.deltax_p);...			% Central differentiation scheme
-    (3*isp(end)-4*isp(end-1)+isp(end-2))/(2*param.len_p*param.deltax_p)];	% Backward differentiation scheme
-
-dien = [(-3*ien(1)+4*ien(2)-ien(3))/(2*param.len_n*param.deltax_n);...		% Forward differentiation scheme
-    (ien(3:end)-ien(1:end-2))/(2*param.len_n*param.deltax_n);...			% Central differentiation scheme
-    (+3*ien(end)-4*ien(end-1)+ien(end-2))/(2*param.len_n*param.deltax_n)];	% Backward differentiation scheme
-
-disn = [(-3*isn(1)+4*isn(2)-isn(3))/(2*param.len_n*param.deltax_n);...		% Forward differentiation scheme
-    (isn(3:end)-isn(1:end-2))/(2*param.len_n*param.deltax_n);...			% Central differentiation scheme
-    (+3*isn(end)-4*isn(end-1)+isn(end-2))/(2*param.len_n*param.deltax_n)];	% Backward differentiation scheme
-
-ie 	= [iep;ien];
-is 	= [isp;isn];
-die = [diep;dien];
-dis = [disp;disn];
 
 end

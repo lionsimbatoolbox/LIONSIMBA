@@ -1,16 +1,8 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
-%
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ELECTROLYTECONDUCTIVITY  Evaluates the conductivity coefficients for the
+function Keff = electrolyteConductivity(ce,T,param,batterySection)
+% electrolyteConductivity  Evaluates the conductivity coefficients for the
 % electrolyte phase. The measurement unit is [S/m]
 %
-%   Keff = ELECTROLYTECONDUCTIVITY(ce,T,param) evaluates
+%   Keff = electrolyteConductivity(ce,T,param) evaluates
 %   the conductivity coefficients for the anode, separator and cathode electrolyte phase of the
 %   battery. You can modify the script to meet your particular needs.
 %
@@ -22,7 +14,26 @@
 %   function of electrolyte concentration and temperature. The main script
 %   will pass also the param array.
 
-function Keff = electrolyteConductivity(ce,T,param,batterySection)
+%   This file is part of the LIONSIMBA Toolbox
+%
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
 if(param.TemperatureEnabled==1)
     switch(batterySection)

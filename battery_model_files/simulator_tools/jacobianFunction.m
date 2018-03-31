@@ -1,19 +1,28 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
+function [J, flag, new_data] = jacobianFunction(~, x, ~, ~, cj, data)
+%	jacobianFunction is used to evaluate the Jacobian Matrix of the P2D model
+%	according to the specifications of the IDA numerical solver. Please refer
+%	to the IDS user's guide for additional information on this function
+
+%   This file is part of the LIONSIMBA Toolbox
 %
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
 %
-% This function is used to evaluate the Jacobian Matrix of the P2D model
-% according to the specifications of the IDA numerical solver. Please refer
-% to the IDS user's guide for additional information on this function
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
 %
-%
-function [J, flag, new_data] = jacobianFunction(t, x, xp, rr, cj, data)
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
 % Extract the function object previously obtained using CasADi
 fJ          = data.fJ;
@@ -26,4 +35,3 @@ J           = full(fJ(x,cj));
 flag        = 0;
 new_data    = [];
 end
-

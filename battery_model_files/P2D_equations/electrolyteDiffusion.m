@@ -1,22 +1,33 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
-%
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ELECTROLYTEDIFFUSION evaluates the residual for the electrolyte
+function [resCe, rhsCe] = electrolyteDiffusion(ce,dCe,jflux,T,param)
+% electrolyteDiffusion evaluates the residual for the electrolyte
 % concentration of Li-ions in the electrolyte solution.
 
-function [resCe, rhsCe] = electrolyteDiffusion(t,ce,dCe,jflux,T,param)
+%   This file is part of the LIONSIMBA Toolbox
+%
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
 % Diffusion coefficients
 % Comment this for benchmark purposes
 Deff_p = param.ElectrolyteDiffusionFunction(ce(1:param.Np),T(param.Nal+1:param.Nal+param.Np),param,'p');
 Deff_s = param.ElectrolyteDiffusionFunction(ce(param.Np+1:param.Np+param.Ns),T(param.Nal+param.Np+1:param.Nal+param.Np+param.Ns),param,'s');
-Deff_n = param.ElectrolyteDiffusionFunction(ce(param.Np+param.Ns+1:end),T(param.Nal+param.Np+param.Ns+1:end-param.Nco),param,'n');
+Deff_n = param.ElectrolyteDiffusionFunction(ce(param.Np+param.Ns+1:end),T(param.Nal+param.Np+param.Ns+1:end-param.Ncu),param,'n');
 
 % Uncomment this for benchmark purposes
 % Deff_p = repmat(param.Dp*param.eps_p^param.brugg_p,param.Np,1);
@@ -109,7 +120,7 @@ first_n     = Deff_s(end)/den_n;
 
 A_tot(param.Np+param.Ns+1,param.Np+param.Ns:param.Np+param.Ns+2) = [first_n -(first_n+second_n) second_n]/(param.deltax_n*param.len_n*param.eps_n);
 
-%% Usefull stuff
+%% Useful stuff
 a_tot       = [
     repmat(param.a_i(1),param.Np,1);...
     zeros(param.Ns,1);...

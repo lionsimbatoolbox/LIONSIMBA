@@ -1,14 +1,26 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
-%
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% LIONSAMBA example script
+% LIONSIMBA example script
 % Multiple cells scenario: simulates three cells in serial connection.
+
+%   This file is part of the LIONSIMBA Toolbox
+%
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
 % Clear the workspace
 clear
@@ -66,8 +78,8 @@ n_plots = 1;
 figure_index = 1;
 figure(2)
 for i=1:ncells
-    subplot(n_plots,ncells,figure_index)
-    ce_indices = [1 results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Ns results.parameters{i}.Np+results.parameters{i}.Ns+results.parameters{i}.Nn]; 
+    subplot(ncells,n_plots,figure_index)
+    ce_indices = [1 results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Ns results.parameters{i}.Np+results.parameters{i}.Ns+results.parameters{i}.Nn];
     plot(results.time{i},results.ce{i}(:,ce_indices),'LineWidth',3)
     grid on
     box on
@@ -77,7 +89,7 @@ for i=1:ncells
 %         set(gca,'xtick',[])
         set(gca,'xticklabel',[])
     end
-    ylabel(['Cell #',num2str(i)])
+    ylabel(['Cell #',num2str(i),' - c_{e} [mol/m^3}'])
     xlim([0 results.time{1}(end)])
     ylim([0 2200])
     figure_index = figure_index+1;
@@ -89,7 +101,7 @@ figure_index = 1;
 figure(3)
 for i=1:ncells
     subplot(ncells,n_plots,figure_index)
-    phie_indices = [1 results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Ns results.parameters{i}.Np+results.parameters{i}.Ns+results.parameters{i}.Nn]; 
+    phie_indices = [1 results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Ns results.parameters{i}.Np+results.parameters{i}.Ns+results.parameters{i}.Nn];
     plot(results.time{i},results.Phie{i}(:,phie_indices),'LineWidth',3)
     grid on
     box on
@@ -111,7 +123,7 @@ figure_index = 1;
 figure(4)
 for i=1:ncells
     subplot(ncells,n_plots,figure_index)
-    cs_indices = [1 results.parameters{i}.Np results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Nn]; 
+    cs_indices = [1 results.parameters{i}.Np results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Nn];
     plot(results.time{i},results.cs_surface{i}(:,cs_indices),'LineWidth',3)
     grid on
     box on
@@ -133,7 +145,7 @@ figure_index = 1;
 figure(5)
 for i=1:ncells
     subplot(ncells,n_plots,figure_index)
-    cs_indices = [1 results.parameters{i}.Np results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Nn]; 
+    cs_indices = [1 results.parameters{i}.Np results.parameters{i}.Np+1 results.parameters{i}.Np+results.parameters{i}.Nn];
     plot(results.time{i},results.Temperature{i}(:,end),'LineWidth',3)
     grid on
     box on
@@ -143,7 +155,7 @@ for i=1:ncells
 %         set(gca,'xtick',[])
         set(gca,'xticklabel',[])
     end
-    ylabel(['Cell #',num2str(i)])
+    ylabel(['Cell #',num2str(i),' - Temp [K]'])
     xlim([0 results.time{1}(end)])
     ylim([296 315])
     figure_index = figure_index+1;

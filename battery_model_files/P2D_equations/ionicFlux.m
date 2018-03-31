@@ -1,20 +1,31 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
+function [jflux,U_p,U_n,dudt_p,dudt_n,J_s] = ionicFlux(ce,cs_star,Phis,Phie,T,solverFlux,film,param,sign_input_density,I_density)
+% ionicFlux Computes the molar flux density of Li-ions at the electrode-electrolyte interface [mol/(m^2*s)].
+
+%   This file is part of the LIONSIMBA Toolbox
 %
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% IONICFLUX computes the value of the ionic flux in the electrodes. [mol /
-% (m^2*s)]
-function [jflux,U_p,U_n,dudt_p,dudt_n,J_s] = ionicFlux(ce,cs_star,Phis,Phie,T,solverFlux,film,param)
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
 %% Positive electrode
 % Compute the OCV for the positive and negative electrodes.
-% [U_p,dudt_p,U_n,dudt_n] = param.OpenCircuitPotentialFunction(cs_star,T,param);
-[U_p,dudt_p,U_n,dudt_n] = openCircuitPotential(cs_star,T,param);
+[U_p,dudt_p,U_n,dudt_n] = param.OpenCircuitPotentialFunction(cs_star,T,param,sign_input_density);
+
 % Compute the reaction rates.
 [k_pT, k_nT] = param.ReactionRatesFunction(T,param);
 
@@ -38,19 +49,18 @@ jnn_calc    = in.* sinh(deltan);
 
 J_s = zeros(param.Nn,1);
 
-% Switch the cases in which the appplied current density is a symbolical variable
-if(isa(param.I,'casadi.SX') && param.EnableAgeing == 1)
-	eta_s = Phis(param.Np+1:end) - Phie(param.Np+param.Ns+1:end) - param.Uref_s - param.F*solverFlux(param.Np+1:end).*(param.R_SEI+film./(param.k_n_aging));
-    % Tafel equation for the side reaction flux. 
-    alpha   = 0.5*param.F./(param.R*T(param.Nal+param.Np+param.Ns+1:end-param.Nco));
-    
-    % By means of the if_else statement of CasADi, it is possible to represent dynamics that switch according to the value of the sumbolical quantity param.I
-    J_s = if_else(param.I>=0,-param.i_0_jside.*(param.I/param.I1C)^param.w.*(exp(-alpha.*eta_s))./param.F,zeros(param.Nn,1));
-elseif(param.EnableAgeing == 1 && param.I > 0)
+% Switch cases when the applied current density is a symbolic variable
+if(isa(I_density,'casadi.MX')||isa(I_density,'casadi.SX') && param.EnableAgeing == 1)
     eta_s = Phis(param.Np+1:end) - Phie(param.Np+param.Ns+1:end) - param.Uref_s - param.F*solverFlux(param.Np+1:end).*(param.R_SEI+film./(param.k_n_aging));
-    % Tafel equation for the side reaction flux. 
-    alpha   = 0.5*param.F./(param.R*T(param.Nal+param.Np+param.Ns+1:end-param.Nco));
-    J_s = -param.i_0_jside.*(param.I/param.I1C)^param.w.*(exp(-alpha.*eta_s))./param.F;
+    % Tafel equation for the side reaction flux.
+    alpha   = 0.5*param.F./(param.R*T(param.Nal+param.Np+param.Ns+1:end-param.Ncu));
+    % By means of the if_else statement of CasADi, it is possible to represent dynamics that switch according to the value of the symbolic quantity I_density
+    J_s = if_else(I_density>=0,-param.i_0_jside.*(I_density/param.I1C)^param.w.*(exp(-alpha.*eta_s))./param.F,zeros(param.Nn,1));
+elseif(param.EnableAgeing == 1 && sign_input_density > 0)
+    eta_s = Phis(param.Np+1:end) - Phie(param.Np+param.Ns+1:end) - param.Uref_s - param.F*solverFlux(param.Np+1:end).*(param.R_SEI+film./(param.k_n_aging));
+    % Tafel equation for the side reaction flux.
+    alpha   = 0.5*param.F./(param.R*T(param.Nal+param.Np+param.Ns+1:end-param.Ncu));
+    J_s = -param.i_0_jside.*(I_density/param.I1C)^param.w.*(exp(-alpha.*eta_s))./param.F;
 end
 %% Return value
 jflux = [jnp_calc;jnn_calc];

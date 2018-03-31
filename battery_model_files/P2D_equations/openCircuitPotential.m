@@ -1,17 +1,9 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This code was written by Marcello Torchio, University of Pavia.
-% Please send comments or questions to
-% marcello.torchio01@ateneopv.it
-%
-% Copyright 2017: 	Marcello Torchio, Lalo Magni, and Davide M. Raimondo, University of Pavia
-%					Bhushan Gopaluni, University of British Columbia
-%                 	Richard D. Braatz, MIT.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% OPENCIRCUITPOTENTIAL  Evaluates the Open Circuit Voltage of the cathode 
+function [U_p,dudt_p,U_n,dudt_n] = openCircuitPotential(cs_star,T,param,inputCurrentSign)
+% openCircuitPotential  Evaluates the Open Circuit Voltage of the cathode 
 %                       and anode of a particular battery. 
 %                       The measurement unit is [V]
 %
-%   [U_p,dudt_p,U_n,dudt_n] = OPENCIRCUITPOTENTIAL(cs_star,T,param)
+%   [U_p,dudt_p,U_n,dudt_n] = openCircuitPotential(cs_star,T,param,inputCurrentSign)
 %
 %       - output:
 %               - U_p and U_n       :  represents respectively the OCV of the 
@@ -24,8 +16,29 @@
 %   You can modify the way that the OCV are computed, as
 %   function of electrolyte concentration and temperature. The main script
 %   will pass also the param array.
+	
+%   This file is part of the LIONSIMBA Toolbox
+%
+%	Official web-site: 	http://sisdin.unipv.it/labsisdin/lionsimba.php
+% 	Official GitHUB: 	https://github.com/lionsimbatoolbox/LIONSIMBA
+%
+%   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
+%   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
+%                            University of Pavia, 27100, Pavia, Italy
+%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Vancouver, BC V6T 1Z3, Canada
+%                            Richard D. Braatz, 
+%                            Massachusetts Institute of Technology, 
+%                            Cambridge, Massachusetts 02142, USA
+%   
+%   Main code contributors to LIONSIMBA 2.0:
+%                           Ian Campbell, Krishnakumar Gopalakrishnan,
+%                           Imperial college London, London, UK
+%
+%   LIONSIMBA is a free Matlab-based software distributed with an MIT
+%   license.
 
-function [U_p,dudt_p,U_n,dudt_n] = openCircuitPotential(cs_star,T,param)
+
 	% Calculate the open circuit voltage of the battery in the positive
 	% electrode
 	theta_p  = cs_star(1:param.Np)./param.cs_maxp;
