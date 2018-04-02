@@ -48,10 +48,6 @@ If LIONSIMBA Toolbox is used for research purposes, the authors would like to ha
 ##### **Download here the [BibTeX](http://sisdin.unipv.it/labsisdin/mtorchio/lionsimba.bib) file**
 
 ##### **Read the Journal paper** [here](http://jes.ecsdl.org/content/163/7/A1192.abstract)
------------------------------------------------------------------
-## Errata corrige
-This section collects typos present in the literature-related paper.
-
 
 -----------------------------------------------------------------
 
@@ -80,14 +76,14 @@ Feel free to fork the project and modify at your best convenienve. The framework
 
 ## Changelog
 
-### Last Update 03/11/2018 - V 2.0 Released
+### Last Update 04/02/2018 - V 2.0 Released
 **Major changes**
 + Constant and variable profile power input mode added
 + Analytical initialisation of the model equations
 + Added thermal lumped model
 + Added stoichiometry indices for SOC calculation
 + Added possibility to initialize cell SOC through Parameters_init call
-+ Added solid phase diffusion scheme based on spectral methods (the scheme provides the correct results, but is not yet 100% completed)
++ Added solid phase diffusion scheme based on spectral methods (provides proper results, but still in beta version)
 
 
 **Minor changes**
@@ -96,7 +92,8 @@ Feel free to fork the project and modify at your best convenienve. The framework
 + Normalized the finite-difference numerical scheme for the solid phase diffusion (it reduces numerical inaccuracies)
 
 **Known bugs/issues**
-+ Thermal diffusivities are different when considering thermal enabled or isothermal scenario.
++ Thermal diffusivities are different when considering thermal enabled or isothermal scenario
++ SOC initialization through initial cell (dis)charge and through Parameters_init leads to different results due to numerical inaccuracies
 
 ### Last Update 06/24/2017 - V 1.024 Released
 
