@@ -21,7 +21,7 @@ Connect to the official web page to get the latest news
 + [Richard D.Braatz](http://web.mit.edu/cheme/people/profile.html?id=48)
 + [Davide M. Raimondo](http://sisdin.unipv.it/labsisdin/raimondo/raimondo.php)
 
-## Main code contributors for LIONSIMBA 2.0
+## Contributors to LIONSIMBA 2.0 besides the previous authors
 + [Ian Campbell](http://www.imperial.ac.uk/electrochem-sci-eng/people/)
 + [Krishnakumar Gopalakrishnan](https://www.edx.org/bio/krishnakumar-gopalakrishnan)
 
