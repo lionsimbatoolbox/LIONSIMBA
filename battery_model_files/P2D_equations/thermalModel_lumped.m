@@ -54,7 +54,7 @@ cell_current = I_density*param.overall_surface_area_for_given_layers;
 Q_polarisation = abs(cell_current)*abs(cell_avg_OCP - V_cell);	% shall always be positive
 
 if param.lumped_thermal_version == 1 % No entropic heat generation
-    mCpdTdt = -(param.hcell*param.tab_area)*(T - param.Tref)...
+    mCpdTdt = -(param.h_lumped*param.tab_area)*(T - param.Tref)...
               + Q_polarisation;
 
 elseif param.lumped_thermal_version == 2 % With entropic heat generation
@@ -69,7 +69,7 @@ elseif param.lumped_thermal_version == 2 % With entropic heat generation
         Q_rev = -cell_current*T*(dUdT_p_avg-dUdT_n_avg);  % Discharging Entropic heat term
     end
 
-    mCpdTdt = -(param.hcell*param.tab_area)*(T - param.Tref)...
+    mCpdTdt = -(param.h_lumped*param.tab_area)*(T - param.Tref)...
               + Q_polarisation + Q_rev;
 else
     error('Incorrect value for choice of thermal model. Exiting..\n')
