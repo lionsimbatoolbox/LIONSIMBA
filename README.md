@@ -24,6 +24,8 @@ Connect to the official web page to get the latest news
 ## Contributors to LIONSIMBA 2.0 besides the previous authors
 + [Ian Campbell](http://www.imperial.ac.uk/electrochem-sci-eng/people/)
 + [Krishnakumar Gopalakrishnan](https://www.edx.org/bio/krishnakumar-gopalakrishnan)
++ [Gregory Offer](https://www.imperial.ac.uk/people/gregory.offer)
+
 
 ## Acknowledgments
 
