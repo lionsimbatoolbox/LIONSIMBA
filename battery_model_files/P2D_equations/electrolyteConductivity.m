@@ -8,7 +8,7 @@ function Keff = electrolyteConductivity(ce,T,param,batterySection)
 %
 %   The conductivity coefficients can be evaluated in isothermal case
 %   (param.TemperatureEnabled=0) or adiabatic case
-%   (param.TemperatureEnabled=1).
+%   (param.TemperatureEnabled=1 or 2).
 %
 %   You can modify the way that the conductivity coefficients are computed, as
 %   function of electrolyte concentration and temperature. The main script
@@ -35,7 +35,7 @@ function Keff = electrolyteConductivity(ce,T,param,batterySection)
 %   LIONSIMBA is a free Matlab-based software distributed with an MIT
 %   license.
 
-if(param.TemperatureEnabled==1)
+if(param.TemperatureEnabled>=1)
     switch(batterySection)
         case'p'
             Keff = param.eps_p^param.brugg_p *(1e-4*ce.*((-10.5+0.668*1e-3*ce+0.494*1e-6*ce.^2) +...

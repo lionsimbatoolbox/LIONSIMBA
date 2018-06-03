@@ -96,7 +96,7 @@ for i=1:n_cells
     % Check the number of cells in order to provide the correct BCs for the
     % thermal dynamics (if the thermal dynamics are active). When thermal
     % dynamics are on, the heat flux between two adjacent cells has to be kept continuous.
-    if(param.TemperatureEnabled == 1)
+    if(param.TemperatureEnabled >= 1)
         if(n_cells==1)
             % If only one cell it is present, then the cell will exchange heat
             % with the surrounding environment.

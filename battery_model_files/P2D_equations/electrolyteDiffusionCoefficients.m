@@ -11,7 +11,7 @@ function Deff = electrolyteDiffusionCoefficients(ce,T,param,batterySection)
 %
 %   The diffusion coefficients can be evaluated in isothermal case
 %   (param.TemperatureEnabled=0) or adiabatic case
-%   (param.TemperatureEnabled=1).
+%   (param.TemperatureEnabled=1 or 2).
 %
 %   You can modify the way that the diffusion coefficients are computed, as
 %   function of electrolyte concentration and temperature. The main script
@@ -40,7 +40,7 @@ function Deff = electrolyteDiffusionCoefficients(ce,T,param,batterySection)
 %   LIONSIMBA is a free Matlab-based software distributed with an MIT
 %   license.
 
-if(param.TemperatureEnabled==1)
+if(param.TemperatureEnabled>=1)
     switch(batterySection)
         case 'p'
             Deff = param.eps_p^param.brugg_p*1e-4*10.^((-4.43-54./(T-229-5e-3*ce)-0.22e-3*ce));
