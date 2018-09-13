@@ -13,6 +13,13 @@ Connect to the official web page to get the latest news
 
 [http://sisdin.unipv.it/labsisdin/lionsimba.php](http://sisdin.unipv.it/labsisdin/lionsimba.php)
 
+<video width="320" height="200" controls="">
+    <source src="video def_compr.mp4" type="video/mp4">
+    <source src="video def_compr.ogg" type="video/ogg">
+    <source src="video def_compr.webm" type="video/webm">
+Il browser non supporta il tag video
+</video>
+
 ## Requirements
 
 Sundials: http://computation.llnl.gov/projects/sundials/download/sundials-2.6.2.tar.gz
