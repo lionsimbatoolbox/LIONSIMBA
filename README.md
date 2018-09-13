@@ -30,7 +30,7 @@ Connect to the official web page to get the latest news
 ## Acknowledgments
 
 + **Andrea Pozzi** for his extensive support for LIONSIMBA 2.0 beta testing and continous support
-
++ **Alessio Stefanini** for his contribution to the maintenance of the LIONSIMBA 2.0 user's guide
 -----------------------------------------------------------------
 ## Citations
 
