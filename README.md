@@ -13,6 +13,14 @@ Connect to the official web page to get the latest news
 
 [http://sisdin.unipv.it/labsisdin/lionsimba.php](http://sisdin.unipv.it/labsisdin/lionsimba.php)
 
+-----------------------------------------------------------------
+## Installation video on different platforms
+
+Windows: https://www.youtube.com/watch?v=jmVh6F44C2I&t=19s
+
+Mac: https://www.youtube.com/watch?v=TKrbP7POU8U&t=16s
+
+Ubuntu: https://www.youtube.com/watch?v=6fAGzPgbN-o
 
 ## Requirements
 
