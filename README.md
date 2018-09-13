@@ -12,6 +12,16 @@
 Connect to the official web page to get the latest news
 
 [http://sisdin.unipv.it/labsisdin/lionsimba.php](http://sisdin.unipv.it/labsisdin/lionsimba.php)
+
+## Requirements
+
+## Sundials: http://computation.llnl.gov/projects/sundials/download/ sundials-2.6.2.tar.gz
+## CasADi:https://github.com/casadi/casadi/wiki/InstallationInstructions
+
+## Suitable Compiler
+
+## MinGW:https://it.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c+ +-compiler
+## SDK:https://developer.microsoft.com/it-it/windows/downloads/windows-10-sdk
 -----------------------------------------------------------------
 ## Authors
 
