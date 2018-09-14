@@ -26,13 +26,13 @@ Ubuntu: https://www.youtube.com/watch?v=6fAGzPgbN-o
 
 Sundials: http://computation.llnl.gov/projects/sundials/download/sundials-2.6.2.tar.gz
 
-CasADi:https://github.com/casadi/casadi/wiki/InstallationInstructions
+CasADi: https://github.com/casadi/casadi/wiki/InstallationInstructions
 
 ## Suitable Compiler
 
-MinGW:https://it.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c++-compiler
+MinGW: https://it.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c++-compiler
 
-SDK:https://developer.microsoft.com/it-it/windows/downloads/windows-10-sdk
+SDK: https://developer.microsoft.com/it-it/windows/downloads/windows-10-sdk
 
 -----------------------------------------------------------------
 ## Authors
