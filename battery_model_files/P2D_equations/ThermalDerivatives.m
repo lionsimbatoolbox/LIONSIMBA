@@ -89,7 +89,7 @@ dPhie_last_s = 2*(Phie(param.Np+param.Ns+1)-Phie(param.Np+param.Ns-1))/( param.d
 dPhie_first_n = 2*(Phie(param.Np+param.Ns+2)-Phie(param.Np+param.Ns))/(3 * param.deltax_n*param.len_n + param.deltax_s*param.len_s);
 
 % Central difference scheme
-dPhien = [(Phie(param.Np+param.Ns+3:end)-Phie(param.Np+param.Ns+1:end-2))/(2*param.deltax_p*param.len_p);...
+dPhien = [(Phie(param.Np+param.Ns+3:end)-Phie(param.Np+param.Ns+1:end-2))/(2*param.deltax_n*param.len_n);...
     (3*Phie(end)-4*Phie(end-1)+Phie(end-2))/(2*param.deltax_n*param.len_n)
     ];
 
