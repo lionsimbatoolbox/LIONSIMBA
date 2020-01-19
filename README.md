@@ -1,7 +1,7 @@
 
 # LIONSIMBA - Lithium-ION SIMulation BAttery Toolbox
 
-<img style="float:right" height="330px" src="http://i68.tinypic.com/2nuhq9h.jpg" alt="Sublime's custom image"/>
+<img style="float:right" height="330px" src="https://i.ibb.co/1QhBgF3/logo.png" alt="Sublime's custom image"/>
 
  A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
 
@@ -14,7 +14,7 @@ Connect to the official web page to get the latest news
 [http://sisdin.unipv.it/labsisdin/lionsimba.php](http://sisdin.unipv.it/labsisdin/lionsimba.php)
 
 -----------------------------------------------------------------
-## Installation video on different platforms
+## Installation video on different platforms (Octave installation follows the same steps)
 
 Windows: https://www.youtube.com/watch?v=jmVh6F44C2I&t=19s
 
@@ -81,7 +81,7 @@ You can get LIONSIMBA in two ways:
 
 ### 1 - Download the latest version in zip format
 
- Download the latest zip package from [HERE](https://github.com/lionsimbatoolbox/LIONSIMBA/archive/master.zip) 
+ Download the latest zip package from [HERE](https://github.com/lionsimbatoolbox/LIONSIMBA/archive/master.zip)
 
 ### 2 - Clone the repository
  ```sh
@@ -99,6 +99,11 @@ Feel free to fork the project and modify at your best convenienve. The framework
 -----------------------------------------------------------------
 
 ## Changelog
+
+### Last Update 01/19/2020 - V 2.1 Released (Now supports Octave)
+**Major changes**
++ Fixed bug in the analytical initialisation of the model equations that was not allowing simulations with ageing (issue#6, thanks to mariapaygani for spotting it)
++ Implemented functions to support execution in Octave
 
 ### Last Update 04/02/2018 - V 2.0 Released
 **Major changes**

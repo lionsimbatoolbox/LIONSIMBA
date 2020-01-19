@@ -58,12 +58,12 @@ function results = startSimulation(t0,tf,initialState,input_density,startParamet
 %   LIONSIMBA: A Matlab framework based on a finite volume model suitable for Li-ion battery design, simulation, and control
 %   Copyright (C) 2016-2018 :Marcello Torchio, Lalo Magni, Davide Raimondo,
 %                            University of Pavia, 27100, Pavia, Italy
-%                            Bhushan Gopaluni, Univ. of British Columbia, 
+%                            Bhushan Gopaluni, Univ. of British Columbia,
 %                            Vancouver, BC V6T 1Z3, Canada
-%                            Richard D. Braatz, 
-%                            Massachusetts Institute of Technology, 
+%                            Richard D. Braatz,
+%                            Massachusetts Institute of Technology,
 %                            Cambridge, Massachusetts 02142, USA
-%   
+%
 %   Main code contributors to LIONSIMBA 2.0:
 %                           Ian Campbell, Krishnakumar Gopalakrishnan,
 %                           Imperial college London, London, UK
@@ -78,7 +78,7 @@ catch
 end
 
 % Version of LIONSIMBA
-version       = '2.0';
+version       = '2.1';
 
 if(isempty(startParameters))
     % Load battery's parameters if not provided by the user
@@ -165,7 +165,7 @@ for i=1:n_cells
     if(param{i}.daeFormulation~=1)
         error(['Make sure that the daeFormulation flag is set to 1 for each cell parameters structure. Cell ', num2str(i),' does not respect this constraint.'])
     end
-    
+
     % When Fick's law of diffusion is used, at least 10 discretization
     % points are required. Raise an error if this condition is not met.
     if((param{i}.Nr_p<10 || param{i}.Nr_n<10) && param{i}.SolidPhaseDiffusion==3)
@@ -207,11 +207,11 @@ for i=1:n_cells
         param{i}.I_density = 0; % this is a dummy value
         param{i}.P_density = 0;
     end
-    
+
     % Preallocate the differentiation matrices used for the solid phase
     % diffusion in case of Fick's law.
     param{i} = solidPhaseDiffusionDifferentiationMatrices(param{i});
-    
+
     % Get the number of unknowns for the differential states
     [~, ~, ~, ~, ~, n_diff(i)] =   differentialInitialConditions(param{i});
     % Get the number of unknowns for the algebraic states
@@ -220,16 +220,16 @@ for i=1:n_cells
     % Store the number of differential and algebraic variables for each cell.
     param{i}.ndiff = n_diff(i);
     param{i}.nalg  = n_alg(i);
-    
+
     % The x_index variable will be used in the battery model file
     % for indexing purposes.
     param{i}.x_index    = (start_x_index:n_diff(i)+n_alg(i)+start_x_index-1);
-    
+
     param{i}.xp_index   = (start_xp_index:n_diff(i)+start_xp_index-1);
-    
+
     % Update the starting x_index value for the (possible) next cell
     start_x_index       = n_diff(i)+n_alg(i)+start_x_index;
-    
+
     start_xp_index      = n_diff(i)+n_alg(i)+start_xp_index;
 end
 
@@ -241,7 +241,7 @@ for i=1:n_cells
         % Solve the algebraic equations to find a set of semi-consistent initial
         % conditions for the algebraic equations. This will help the DAE solver as a warm startup.
         init_point = initialise_model(param{i});
-        
+
         % Build the initial values array for the integrator
         Yt0 = [ce_init;cs_average_init;T_init;film_init;Q_init;init_point];
         Y0  = [Y0;Yt0];
@@ -321,7 +321,7 @@ if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
 
     % Get the model equations written in an implicit form in a symbolic way.
     [dx_tot, ~, ~] = batteryModel(0,xsym,xpsym,ida_user_data);
-    
+
     % Evaluate the Jacobian matrix. (Please refer to the Sundials guide for
     % further information about the Jacobian structure).
     J = jacobian(dx_tot,xsym) + cj*jacobian(dx_tot,xpsym);
@@ -346,7 +346,7 @@ if(param{1}.UseJacobian==1 && isempty(param{1}.JacobianFunction))
 elseif(param{1}.UseJacobian==1 && ~isempty(param{1}.JacobianFunction))
     % If the Jacobian needs to be used and it has also been provided in the
     % parameters structure, use it directly.
-    
+
     disp('Analytical function of the Jacobian matrix provided by the user.')
     % If the Jacobian has been provided from the user, use it.
     JacFun = param{1}.JacobianFunction;
@@ -410,7 +410,7 @@ y_tot = y;
 sim_time = 0;  % Simulation time (i.e. wall) for reporting purposes only. Not used in controlling solver or time-loop
 % Loop until the integration time reaches tf.
 while(t<tf)
-    
+
     % Check if simulation stop conditions are met or not
     exit_reason = checkSimulationStopConditions(n_cells, Phis_t, cs_bar_t, T_t, param);
     % If a stop condition is reached, stop the simulation
@@ -423,7 +423,7 @@ while(t<tf)
     % refer to IDA manual for more information about syntax and its usage.
     tic
     [status, t, y]   = IDASolve(tf,'OneStep');
-    
+
     % If status > 0 it means that roots have been found during the
     % resolution of the equations
     if(status>0)
@@ -434,7 +434,7 @@ while(t<tf)
             % using the last known values of the states
             t = t*(1+1e-5);
             IDAReInit(t,y,0*y,options);
-            
+
             % Find consistent initial conditions starting from the new
             % point and keep on integrating
             [~, y, yp] = IDACalcIC(t+10,'FindAlgebraic');
@@ -475,7 +475,7 @@ while(t<tf)
             elseif (param{1}.OperatingMode==2) || (param{1}.OperatingMode==5)
                 fprintf(['Applied power density \t\t',num2str(param{1}.getPowerDensity(t,t0,tf,param{1}.extraData)),' W/m^2\n']);
             end
-				
+
 			switch param{1}.edge_values
 				% Linear interpolation
 				case 2
