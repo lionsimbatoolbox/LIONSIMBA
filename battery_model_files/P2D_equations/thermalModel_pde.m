@@ -112,7 +112,7 @@ A_s     = A_s/(param.deltax_s*param.len_s)^2;
 A_n     = A_n/(param.deltax_n*param.len_n)^2;
 A_cu    = A_cu/(param.deltax_cu*param.len_cu)^2;
 
-A_tot = blkdiag(A_al,A_p,A_s,A_n,A_cu);
+A_tot = blockDiagonalMatrix(param,A_al,A_p,A_s,A_n,A_cu);
 
 %% Interfaces
 
