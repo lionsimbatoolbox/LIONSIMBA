@@ -45,7 +45,7 @@ end
 ce_init = param.ce_init*[ones(param.Np,1);ones(param.Ns,1);ones(param.Nn,1)];
 Phie_init = zeros(param.Np + param.Ns + param.Nn, 1); % designated as the ground potential for this system
 
-solverFlux  = zeros(param.Nn, 1);
+solverFlux  = zeros(param.Np+param.Nn, 1);
 film = zeros(param.Nn, 1);
 
 jflux_init = ionicFlux(ce_init, cs_star, Phis_init, Phie_init, T, solverFlux, film, param,sign_input_density,I_density);
