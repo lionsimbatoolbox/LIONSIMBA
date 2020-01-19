@@ -58,8 +58,7 @@ A_n(2:end,1:end-1)  = A_n(2:end,1:end-1) + diag(Deff_n(1:end-1));
 % Fix the last elements of the A_n
 A_n(end,end-1:end)  = [Deff_n(end-1) -Deff_n(end-1)];
 %% A_tot matrix
-
-A_tot                   = blkdiag(A_p,A_s,A_n);
+A_tot = blockDiagonalMatrix(param,A_p,A_s,A_n);
 
 % Divide by the deltax and the length of the positive electrode
 A_tot(1:param.Np,1:param.Np)    = A_tot(1:param.Np,1:param.Np)/(param.deltax_p^2*param.len_p^2);

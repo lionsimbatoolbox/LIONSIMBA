@@ -70,7 +70,7 @@ A_n = A_n./(param.deltax_n*param.len_n);
 A_s = A_s./(param.deltax_s*param.len_s);
 A_p = A_p./(param.deltax_p*param.len_p);
 
-A_tot = blkdiag(A_p,A_s,A_n);
+A_tot = blockDiagonalMatrix(param,A_p,A_s,A_n);
 
 % Fix values to enforce BC on the left side of the positive electrode.
 % A_tot(1,1:2) = [Keff_p_medio(1) -Keff_p_medio(1)]./(param.deltax_p*param.len_p);
