@@ -479,4 +479,14 @@ param.JacobianFunction = [];
 %
 param.daeFormulation = 1;
 
+
+% DO NOT CHANGE THE FOLLOWING LINES
+% The following lines of code are used to identify whether the platform under which
+% LIONSIMBA is executed is either Matlab or Octave
+
+% Check if the code is running under Octave. If running Octave, the following 
+% instruction should return 5. If 0 is provided instead, then it means that Matlab
+% is in execution
+param.isMatlab = exist('OCTAVE_VERSION', 'builtin') == 0 ;
+
 end
