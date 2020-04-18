@@ -17,6 +17,7 @@ Connect to the official web page to get the latest news
 ## Installation, and requirements
 
 Please refer to the [Wiki](https://github.com/lionsimbatoolbox/LIONSIMBA/wiki) of this project for information about installation and requirements.
+
 -----------------------------------------------------------------
 ## Authors
 
