@@ -21,10 +21,10 @@ Please refer to the [Wiki](https://github.com/lionsimbatoolbox/LIONSIMBA/wiki) o
 -----------------------------------------------------------------
 ## Authors
 
-+ [Marcello Torchio](https://www.linkedin.com/in/marcello-torchio-4176368a)
++ [Marcello Torchio](mailto:marcello.torchio01@ateneopv.it)
 + [Lalo Magni](http://sisdin.unipv.it/labsisdin/people/maglal/maglal.php)
 + [Bhushan R. Gopaluni](http://www.chbe.ubc.ca/profile/bhushan-gopaluni/)
-+ [Richard D.Braatz](http://web.mit.edu/cheme/people/profile.html?id=48)
++ [Richard D.Braatz](https://cheme.mit.edu/profile/richard-d-braatz/)
 + [Davide M. Raimondo](http://sisdin.unipv.it/labsisdin/raimondo/raimondo.php)
 
 ## Contributors to LIONSIMBA 2.0 besides the previous authors
@@ -55,7 +55,7 @@ If LIONSIMBA Toolbox is used for research purposes, the authors would like to ha
 
 ##### **Download here the [BibTeX](http://sisdin.unipv.it/labsisdin/mtorchio/lionsimba.bib) file**
 
-##### **Read the Journal paper** [here](http://jes.ecsdl.org/content/163/7/A1192.abstract)
+##### **Read the Journal paper** [here](https://web.mit.edu/braatzgroup/Torchio_JElectSoc_2016.pdf)
 
 -----------------------------------------------------------------
 
