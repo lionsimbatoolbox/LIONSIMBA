@@ -35,7 +35,7 @@ Please refer to the [Wiki](https://github.com/lionsimbatoolbox/LIONSIMBA/wiki) o
 
 ## Acknowledgments
 
-+ **Andrea Pozzi** for his extensive support for LIONSIMBA 2.0 beta testing and continous support
++ [Andrea Pozzi](https://scholar.google.com/citations?user=RLCmMM8AAAAJ) for his extensive support for LIONSIMBA 2.0 beta testing and continous support
 + **Alessio Stefanini** for his contribution to the maintenance of the LIONSIMBA 2.0 user's guide
 -----------------------------------------------------------------
 ## Citations
