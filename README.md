@@ -14,26 +14,9 @@ Connect to the official web page to get the latest news
 [http://sisdin.unipv.it/labsisdin/lionsimba.php](http://sisdin.unipv.it/labsisdin/lionsimba.php)
 
 -----------------------------------------------------------------
-## Installation video on different platforms (Octave installation follows the same steps)
+## Installation, and requirements
 
-Windows: https://www.youtube.com/watch?v=jmVh6F44C2I&t=19s
-
-Mac: https://www.youtube.com/watch?v=TKrbP7POU8U&t=16s
-
-Ubuntu: https://www.youtube.com/watch?v=6fAGzPgbN-o
-
-## Requirements
-
-Sundials: http://computation.llnl.gov/projects/sundials/download/sundials-2.6.2.tar.gz
-
-CasADi: https://github.com/casadi/casadi/wiki/InstallationInstructions
-
-## Suitable Compiler
-
-MinGW: https://it.mathworks.com/matlabcentral/fileexchange/52848-matlab-support-for-mingw-w64-c-c++-compiler
-
-SDK: https://developer.microsoft.com/it-it/windows/downloads/windows-10-sdk
-
+Please refer to the [Wiki](https://github.com/lionsimbatoolbox/LIONSIMBA/wiki) of this project for information about installation and requirements.
 -----------------------------------------------------------------
 ## Authors
 
