@@ -32,7 +32,7 @@ if(~isempty(initialState))
     end
 
     if(Y_field_existence==1 && YP_field_existence==1)
-        if(~isempty(initialState.Y) && ~isempty(initialState.Y))
+        if(~isempty(initialState.Y) && ~isempty(initialState.YP))
             Y0              = initialState.Y;
             YP0             = initialState.YP;
             Y0_existence    = 1;
