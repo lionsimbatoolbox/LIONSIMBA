@@ -57,6 +57,13 @@ If LIONSIMBA Toolbox is used for research purposes, the authors would like to ha
 
 ##### **Read the Journal paper** [here](https://web.mit.edu/braatzgroup/Torchio_JElectSoc_2016.pdf)
 
+### Typos
+
+The equation for the ionic flux reported in Table I and Table III has a typo in the formulation. Indeed the version on the paper reports the Faraday's constant (F) at the denominator, while the universal gas constat at the numerator. This should be inverted. The correct equation is:
+<img src="https://render.githubusercontent.com/render/math?math=j_{\textrm{int}}(x,t) = 2 \frac{i_{0,\textrm{int}}}{F} \sinh \left[\frac{0.5 F}{\textrm{R} T(x,t)} \eta_{\textrm{int}}\right],">
+
+Thanks to [sarasyha](https://github.com/sarasyha) for pointing it out in [Issue#11](https://github.com/lionsimbatoolbox/LIONSIMBA/issues/11)
+
 -----------------------------------------------------------------
 
 ## How to start using LIONSIMBA
